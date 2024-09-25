@@ -3,5 +3,55 @@
 {% block title %}Homepage{% endblock %}
 
 {% block content %}
-    <h1>HOMGPAGE content</h1>
+<!-- Main Section -->
+<div class="container mt-5">
+    <!-- Section for Heading and Description -->
+    <div class="row">
+        <div class="col-lg-6">
+            <h2>World's best on show in FIFA's tournaments</h2>
+            <p>
+                As well as showcasing the very best the beautiful game has to offer, FIFA’s tournaments drive the sport’s development.
+                The FIFA World Cup™ and FIFA Women’s World Cup™ offer a shot at global glory to the game’s top nations, while elite clubs come together to contest the FIFA Club World Cup.
+                The FIFA U-17 and U-20 World Cups and their female equivalents have a well-earned reputation for helping develop superstars-in-the-making, while the FIFA Futsal World Cup™ and FIFA Beach Soccer World Cup™ provide a platform for the crème de la crème of these thrilling disciplines.
+            </p>
+        </div>
+        <!-- Section for Image -->
+        <div class="col-lg-6">
+            <img src="/images/images.jpeg" class="img-fluid" alt="FIFA Players">
+        </div>
+    </div>
+
+    <div class="mt-5">
+        <h4>Upcoming Tournaments & Events</h4>
+        
+        <!-- Horizontal scroll container for the tournaments -->
+        <div class="d-flex justify-content-center flex-wrap">
+            <!-- First Tournament -->
+            <div class="card m-3" style="width: 18rem;">
+                <img src="/images/tournament1.jpg" class="card-img-top" alt="Tournament 1">
+                <div class="card-body">
+                    <p class="card-text">FIFA U-17 Women's World Cup Dominican Republic 2024™</p>
+                </div>
+            </div>
+            
+            <!-- Second Tournament -->
+            <div class="card m-3" style="width: 18rem;">
+                <img src="/images/tournament2.jpg" class="card-img-top" alt="Tournament 2">
+                <div class="card-body">
+                    <p class="card-text">FIFA Beach Soccer World Cup Seychelles 2025™</p>
+                </div>
+            </div>
+            
+            <!-- Third Tournament -->
+            <div class="card m-3" style="width: 18rem;">
+                <img src="/images/tournament3.jpg" class="card-img-top" alt="Tournament 3">
+                <div class="card-body">
+                    <p class="card-text">FIFA Club World Cup 2025™</p>
+                </div>
+            </div>
+            
+            <!-- Additional cards can go here -->
+        </div>
+    </div>
+</div>
 {% endblock %}
