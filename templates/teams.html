@@ -19,8 +19,8 @@
 
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4">
         {% for i in range(20) %}
-        <div class="col mb-4"> <!-- Added mb-4 class for bottom margin -->
-            <div class="card h-100">
+        <div class="col mb-4">
+            <div class="card h-100" data-bs-toggle="modal" data-bs-target="#teamModal{{ i }}" style="cursor: pointer;">
                 <div class="card-body">
                     <h6 class="card-title">Team Name</h6>
                     <p class="card-text">
@@ -30,10 +30,33 @@
                 </div>
             </div>
         </div>
+
+        <!-- Modal for each team -->
+        <div class="modal fade" id="teamModal{{ i }}" tabindex="-1" aria-labelledby="teamModalLabel{{ i }}" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="teamModalLabel{{ i }}">Team Name</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>Country:</strong> Team Country</p>
+                        <p><strong>Founded:</strong> Year</p>
+                        <p><strong>Stadium:</strong> Stadium Name</p>
+                        <p><strong>Manager:</strong> Manager Name</p>
+                        <p><strong>League:</strong> League Name</p>
+                        <!-- Add more details as needed -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         {% endfor %}
     </div>
 
-    <nav aria-label="Page navigation" class="mt-5"> <!-- Changed mt-4 to mt-5 for more space -->
+    <nav aria-label="Page navigation" class="mt-5">
         <ul class="pagination justify-content-center">
             <li class="page-item"><a class="page-link" href="#">Previous</a></li>
             <li class="page-item"><a class="page-link" href="#">1</a></li>
