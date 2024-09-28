@@ -1,17 +1,32 @@
 from flask import Flask, redirect, url_for, render_template
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.sql import text
 from admin.routes import adminRoutes
+
+from os import getenv
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
 app.register_blueprint(adminRoutes, url_prefix="/admin")
 
 #Configuration for PostgreSQL database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://fifa_admin:fifa_admin!@localhost/fifa_db'
+app.config['SQLALCHEMY_DATABASE_URI'] = getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 
 # Initialize the database
 db = SQLAlchemy(app)
+
+@app.route('/test-db')
+def test_db():
+    try:
+        # Attempt to query the database
+        result = db.session.execute(text('SELECT 1'))
+        return f"Database connection test successful: {result.scalar()}"
+    except Exception as e:
+        return f"Database connection test failed: {str(e)}"
 
 @app.route('/')
 def home():
