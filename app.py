@@ -14,8 +14,30 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 @app.route('/')
-def hello_world():
+def home():
     return render_template("index.html")
+
+@app.route('/index')
+def index():
+    return render_template("index.html")
+
+
+@app.route('/ranking')
+def ranking():
+    return render_template("ranking.html")
+
+@app.route('/teams')
+def teams():
+    return render_template("teams.html")
+
+@app.route('/players')
+def players():
+    return render_template("players.html")
+
+@app.route('/match')
+def stats():
+    return render_template("matches.html")
+
 
 if __name__ == '__main__':
     app.run(debug=True)
