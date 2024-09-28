@@ -19,15 +19,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Initialize the database
 db = SQLAlchemy(app)
 
-@app.route('/test-db')
-def test_db():
-    try:
-        # Attempt to query the database
-        result = db.session.execute(text('SELECT 1'))
-        return f"Database connection test successful: {result.scalar()}"
-    except Exception as e:
-        return f"Database connection test failed: {str(e)}"
-
 @app.route('/')
 def home():
     return render_template("index.html")
@@ -52,7 +43,6 @@ def players():
 @app.route('/match')
 def stats():
     return render_template("matches.html")
-
 
 if __name__ == '__main__':
     app.run(debug=True)
