@@ -4,6 +4,10 @@ from admin.routes import adminRoutes
 app = Flask(__name__)
 app.register_blueprint(adminRoutes, url_prefix="/admin")
 
+@app.route('/')
+def home():
+    return render_template("index.html")
+
 @app.route('/index')
 def index():
     return render_template("index.html")
@@ -21,9 +25,9 @@ def teams():
 def players():
     return render_template("players.html")
 
-@app.route('/stats')
+@app.route('/match')
 def stats():
-    return render_template("statistics.html")
+    return render_template("matches.html")
 
 
 if __name__ == '__main__':
