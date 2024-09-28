@@ -6,9 +6,10 @@
 <div class="container">
     <h3 class="mt-4 mb-4">Teams</h3>
 
+    <!-- Search bar -->
     <div class="mb-4">
         <div class="input-group">
-            <input type="text" class="form-control" placeholder="Search by name or country">
+            <input type="text" class="form-control" placeholder="Search by name or continent">
             <div class="input-group-append">
                 <button class="btn btn-outline-secondary" type="button">
                     <i class="fas fa-search"></i>
@@ -17,35 +18,34 @@
         </div>
     </div>
 
+    <!-- Team cards and modals -->
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4">
-        {% for i in range(20) %}
+        {% for team in teams %}
         <div class="col mb-4">
-            <div class="card h-100" data-bs-toggle="modal" data-bs-target="#teamModal{{ i }}" style="cursor: pointer;">
+            <div class="card h-100" data-bs-toggle="modal" data-bs-target="#teamModal{{ team.team_id }}" style="cursor: pointer;">
                 <div class="card-body">
-                    <h6 class="card-title">Team Name</h6>
+                    <h6 class="card-title">{{ team.team_name }}</h6>
                     <p class="card-text">
-                        Country<br>
-                        ETC
+                        FIFA Code: {{ team.fifa_code }}<br>
+                        Continent: {{ team.continent }}
                     </p>
                 </div>
             </div>
         </div>
 
         <!-- Modal for each team -->
-        <div class="modal fade" id="teamModal{{ i }}" tabindex="-1" aria-labelledby="teamModalLabel{{ i }}" aria-hidden="true">
+        <div class="modal fade" id="teamModal{{ team.team_id }}" tabindex="-1" aria-labelledby="teamModalLabel{{ team.team_id }}" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="teamModalLabel{{ i }}">Team Name</h5>
+                        <h5 class="modal-title" id="teamModalLabel{{ team.team_id }}">{{ team.team_name }}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <p><strong>Country:</strong> Team Country</p>
-                        <p><strong>Founded:</strong> Year</p>
-                        <p><strong>Stadium:</strong> Stadium Name</p>
-                        <p><strong>Manager:</strong> Manager Name</p>
-                        <p><strong>League:</strong> League Name</p>
-                        <!-- Add more details as needed -->
+                        <p><strong>Team Name:</strong> {{ team.team_name }}</p>
+                        <p><strong>FIFA Code:</strong> {{ team.fifa_code }}</p>
+                        <p><strong>Continent:</strong> {{ team.continent }}</p>
+                        <!-- You can add more team details here -->
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -56,6 +56,7 @@
         {% endfor %}
     </div>
 
+    <!-- Pagination (optional) -->
     <nav aria-label="Page navigation" class="mt-5">
         <ul class="pagination justify-content-center">
             <li class="page-item"><a class="page-link" href="#">Previous</a></li>

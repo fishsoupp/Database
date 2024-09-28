@@ -34,11 +34,41 @@ def ranking():
 
 @app.route('/teams')
 def teams():
-    return render_template("teams.html")
+    # Use a connection context manager to execute the query
+    with db.engine.connect() as connection:
+        query = text("SELECT team_id, team_name, fifa_code, continent FROM teams")
+        result = connection.execute(query)
+
+        teams = []
+        for row in result:
+            teams.append({
+                "team_id": row["team_id"],
+                "team_name": row["team_name"],
+                "fifa_code": row["fifa_code"],
+                "continent": row["continent"]
+            })
+
+    return render_template("teams.html", teams=teams)
+
+
 
 @app.route('/players')
 def players():
-    return render_template("players.html")
+    query = text("SELECT player_id, player_name, team_id, position, date_of_birth, caps FROM players")
+    result = db.engine.execute(query)
+    
+    players = []
+    for row in result:
+        players.append({
+            "player_id": row["player_id"],
+            "player_name": row["player_name"],
+            "team_id": row["team_id"],
+            "position": row["position"],
+            "date_of_birth": row["date_of_birth"],
+            "caps": row["caps"]
+        })
+    
+    return render_template("players.html", players=players)
 
 @app.route('/match')
 def stats():
