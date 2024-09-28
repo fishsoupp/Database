@@ -5,13 +5,13 @@ from admin.routes import adminRoutes
 app = Flask(__name__)
 app.register_blueprint(adminRoutes, url_prefix="/admin")
 
-# Configuration for PostgreSQL database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:password@localhost/TicketGrabdb'
+#Configuration for PostgreSQL database
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://fifa_admin:fifa_admin!@localhost/fifa_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 
 # Initialize the database
 db = SQLAlchemy(app)
-
 
 @app.route('/')
 def hello_world():
