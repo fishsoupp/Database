@@ -1,0 +1,90 @@
+{% extends "admin_base.html" %}
+
+{% block content %}
+<!-- Sidebar and Page Content Wrapper -->
+<div class="d-flex">
+    <!-- Sidebar -->
+    <nav id="sidebar" class="bg-dark text-white" style="min-width: 250px; height: 100vh; position: fixed;">
+        <div class="sidebar-header text-center py-4 bg-dark text-light">
+            <h4>Admin Panel</h4>
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item bg-dark">
+                <a href="#" class="text-white">Dashboard</a>
+            </li>
+            <li class="list-group-item bg-dark">
+                <a href="#" class="text-white">Layouts</a>
+            </li>
+            <li class="list-group-item bg-dark">
+                <a href="#" class="text-white">Charts</a>
+            </li>
+            <li class="list-group-item bg-dark">
+                <a href="#" class="text-white">Widgets</a>
+            </li>
+            <li class="list-group-item bg-dark">
+                <a href="#" class="text-white">Forms</a>
+            </li>
+            <li class="list-group-item bg-dark">
+                <a href="#" class="text-white">Tables</a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Page Content -->
+    <div id="page-content-wrapper" class="w-100 p-4" style="margin-left: 250px;">
+        <!-- Top Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm mb-4">
+            <button class="btn btn-primary" id="menu-toggle">Menu</button>
+            <form class="d-flex ms-auto">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-primary" type="submit">Go</button>
+            </form>
+            <div class="dropdown ms-3">
+                <a href="#" class="d-flex align-items-center text-decoration-none" id="dropdownMenuButton" data-bs-toggle="dropdown">
+                    <img src="{{ url_for('static', filename='images/profile.jpg') }}" alt="Profile" class="rounded-circle" width="30" height="30">
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="#">Profile</a></li>
+                    <li><a class="dropdown-item" href="#">Settings</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ url_for('adminRoutes.logout') }}">Logout</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Dashboard Content -->
+        <h2 class="mb-4">Dashboard</h2>
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Manage Employees</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Address</th>
+                            <th>Phone</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Thomas Hardy</td>
+                            <td>ThomasHardy@gmail.com</td>
+                            <td>90 Parkground Poland USA</td>
+                            <td>(78-585262-9)</td>
+                            <td>
+                                <a href="#" class="btn btn-warning btn-sm">Edit</a>
+                                <a href="#" class="btn btn-danger btn-sm">Delete</a>
+                            </td>
+                        </tr>
+                        <!-- Repeat rows as needed -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

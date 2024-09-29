@@ -1,0 +1,125 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Goals Management{% endblock %}
+
+{% block content %}
+<h2>Goals Management</h2>
+<button class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#recordGoalModal">Record Goal</button>
+
+<!-- Table for Goals -->
+<table class="table">
+  <thead>
+    <tr>
+      <th>Goal ID</th>
+      <th>Player</th>
+      <th>Match</th>
+      <th>Minute Scored</th>
+      <th>Penalty</th>
+      <th>Own Goal</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Dummy Data for Goals -->
+    <tr>
+      <td>1</td>
+      <td>Player X</td>
+      <td>Match A vs B</td>
+      <td>45</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>
+        <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editGoalModal-1">Edit</button>
+        <button class="btn btn-sm btn-danger">Delete</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- Record Goal Modal -->
+<div class="modal fade" id="recordGoalModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Record Goal</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label for="player" class="form-label">Player</label>
+            <select class="form-control" id="player" name="player">
+              <option>Player X</option>
+              <option>Player Y</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="match" class="form-label">Match</label>
+            <select class="form-control" id="match" name="match">
+              <option>Match A vs B</option>
+              <option>Match C vs D</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="minute" class="form-label">Minute Scored</label>
+            <input type="number" class="form-control" id="minute" name="minute" required>
+          </div>
+          <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="penalty" name="penalty">
+            <label for="penalty" class="form-check-label">Penalty</label>
+          </div>
+          <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="ownGoal" name="ownGoal">
+            <label for="ownGoal" class="form-check-label">Own Goal</label>
+          </div>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Record Goal</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Goal Modal for Dummy Data -->
+<div class="modal fade" id="editGoalModal-1" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Goal</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label for="playerEdit" class="form-label">Player</label>
+            <select class="form-control" id="playerEdit" name="playerEdit">
+              <option>Player X</option>
+              <option>Player Y</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="matchEdit" class="form-label">Match</label>
+            <select class="form-control" id="matchEdit" name="matchEdit">
+              <option>Match A vs B</option>
+              <option>Match C vs D</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="minuteEdit" class="form-label">Minute Scored</label>
+            <input type="number" class="form-control" id="minuteEdit" name="minuteEdit" value="45" required>
+          </div>
+          <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="penaltyEdit" name="penaltyEdit" checked>
+            <label for="penaltyEdit" class="form-check-label">Penalty</label>
+          </div>
+          <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="ownGoalEdit" name="ownGoalEdit">
+            <label for="ownGoalEdit" class="form-check-label">Own Goal</label>
+          </div>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

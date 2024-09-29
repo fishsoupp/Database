@@ -4,6 +4,8 @@ from admin.routes import adminRoutes
 
 app = Flask(__name__)
 app.register_blueprint(adminRoutes, url_prefix="/admin")
+app.config['SECRET_KEY'] = '\xb0\t\xce\x90\x1a\xb7\xfb\x1e\xdb\xb5\xdd\xc0'
+
 
 #Configuration for PostgreSQL database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://fifa_admin:fifa_admin!@localhost/fifa_db'
