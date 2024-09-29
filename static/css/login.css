@@ -1,0 +1,93 @@
+/* Dim background overlay */
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black overlay */
+    z-index: 0;
+}
+
+/* Body styling */
+body {
+    background-image: url('/static/images/loginpage.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    padding: 0;
+}
+
+/* Ensure the card is on top of the overlay */
+.card {
+    position: relative;
+    z-index: 1;
+    background-color: white;
+    padding: 3rem; /* Increased padding for better spacing */
+    border-radius: 15px; /* Slightly increased the border-radius */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Slightly larger shadow for more depth */
+    width: 400px; /* Increased width */
+    height: 500px; /* Increased height */
+}
+
+/* Center the container content */
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+h3 {
+    font-size: 1.8rem; /* Increased font size */
+    font-weight: 700; /* Increased font weight */
+    margin-bottom: 1.5rem;
+    text-align: center; /* Centered the title */
+}
+
+.form-control {
+    border-radius: 0.375rem;
+    padding: 0.9rem; /* Increased padding */
+    font-size: 1rem; /* Made input text larger */
+}
+
+button {
+    padding: 0.9rem; /* Increased padding */
+    font-size: 1.2rem;
+    background-color: #004085;
+    border-radius: 0.375rem; /* Added border radius for a more polished button */
+    color: white; /* Ensured button text is white */
+    cursor: pointer;
+    width: 100%; /* Made button full width */
+    margin-top: 1rem;
+}
+
+button:hover {
+    background-color: #002a5d; /* Darkened the button on hover */
+}
+
+.form-check-label {
+    margin-left: 0.5rem;
+    font-size: 0.9rem; /* Slightly increased font size for better readability */
+    display: flex;
+    align-items: center;
+}
+
+/* Add media queries for responsiveness */
+@media (max-width: 500px) {
+    .card {
+        width: 90%; /* Adjust width for smaller screens */
+        height: auto; /* Let height adjust dynamically */
+        padding: 2rem;
+    }
+
+    h3 {
+        font-size: 1.5rem;
+    }
+}

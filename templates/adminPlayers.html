@@ -1,0 +1,155 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Players Management{% endblock %}
+
+{% block content %}
+<h2>Players Management</h2>
+<button class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#createPlayerModal">Create Player</button>
+
+<!-- Table for Players -->
+<table class="table">
+  <thead>
+    <tr>
+      <th>Player ID</th>
+      <th>Player Name</th>
+      <th>Team</th>
+      <th>Position</th>
+      <th>Caps</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Dummy Data for Players -->
+    <tr>
+      <td>1</td>
+      <td>John Doe</td>
+      <td>Team A</td>
+      <td>Midfielder</td>
+      <td>25</td>
+      <td>
+        <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editPlayerModal-1">Edit</button>
+        <button class="btn btn-sm btn-danger">Delete</button>
+      </td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Jane Smith</td>
+      <td>Team B</td>
+      <td>Forward</td>
+      <td>18</td>
+      <td>
+        <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editPlayerModal-2">Edit</button>
+        <button class="btn btn-sm btn-danger">Delete</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- Create Player Modal -->
+<div class="modal fade" id="createPlayerModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Create Player</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label for="playerName" class="form-label">Player Name</label>
+            <input type="text" class="form-control" id="playerName" name="playerName" required>
+          </div>
+          <div class="mb-3">
+            <label for="team" class="form-label">Team</label>
+            <select class="form-control" id="team" name="team">
+              <option value="1">Team A</option>
+              <option value="2">Team B</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="position" class="form-label">Position</label>
+            <input type="text" class="form-control" id="position" name="position" required>
+          </div>
+          <div class="mb-3">
+            <label for="caps" class="form-label">Caps</label>
+            <input type="number" class="form-control" id="caps" name="caps" required>
+          </div>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Add Player</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Player Modals for Dummy Data -->
+<div class="modal fade" id="editPlayerModal-1" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Player</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label for="playerName1" class="form-label">Player Name</label>
+            <input type="text" class="form-control" id="playerName1" name="playerName" value="John Doe" required>
+          </div>
+          <div class="mb-3">
+            <label for="team1" class="form-label">Team</label>
+            <select class="form-control" id="team1" name="team">
+              <option value="1" selected>Team A</option>
+              <option value="2">Team B</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="position1" class="form-label">Position</label>
+            <input type="text" class="form-control" id="position1" name="position" value="Midfielder" required>
+          </div>
+          <div class="mb-3">
+            <label for="caps1" class="form-label">Caps</label>
+            <input type="number" class="form-control" id="caps1" name="caps" value="25" required>
+          </div>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="editPlayerModal-2" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Player</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label for="playerName2" class="form-label">Player Name</label>
+            <input type="text" class="form-control" id="playerName2" name="playerName" value="Jane Smith" required>
+          </div>
+          <div class="mb-3">
+            <label for="team2" class="form-label">Team</label>
+            <select class="form-control" id="team2" name="team">
+              <option value="1">Team A</option>
+              <option value="2" selected>Team B</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="position2" class="form-label">Position</label>
+            <input type="text" class="form-control" id="position2" name="position" value="Forward" required>
+          </div>
+          <div class="mb-3">
+            <label for="caps2" class="form-label">Caps</label>
+            <input type="number" class="form-control" id="caps2" name="caps" value="18" required>
+          </div>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

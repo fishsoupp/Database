@@ -1,0 +1,125 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Tournaments Management{% endblock %}
+
+{% block content %}
+<h2>Tournaments Management</h2>
+<button class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#createTournamentModal">Create Tournament</button>
+
+<!-- Table for Tournaments -->
+<table class="table">
+  <thead>
+    <tr>
+      <th>Tournament ID</th>
+      <th>Year</th>
+      <th>Host Country</th>
+      <th>Winner</th>
+      <th>Runner-Up</th>
+      <th>Matches Played</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Dummy Data for Tournaments -->
+    <tr>
+      <td>1</td>
+      <td>2022</td>
+      <td>Country A</td>
+      <td>Team X</td>
+      <td>Team Y</td>
+      <td>10</td>
+      <td>
+        <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editTournamentModal-1">Edit</button>
+        <button class="btn btn-sm btn-danger">Delete</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- Create Tournament Modal -->
+<div class="modal fade" id="createTournamentModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Create Tournament</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label for="year" class="form-label">Year</label>
+            <input type="number" class="form-control" id="year" name="year" required>
+          </div>
+          <div class="mb-3">
+            <label for="hostCountry" class="form-label">Host Country</label>
+            <input type="text" class="form-control" id="hostCountry" name="hostCountry" required>
+          </div>
+          <div class="mb-3">
+            <label for="winner" class="form-label">Winner</label>
+            <select class="form-control" id="winner" name="winner">
+              <option>Team X</option>
+              <option>Team Y</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="runnerUp" class="form-label">Runner-Up</label>
+            <select class="form-control" id="runnerUp" name="runnerUp">
+              <option>Team X</option>
+              <option>Team Y</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="matchesPlayed" class="form-label">Matches Played</label>
+            <input type="number" class="form-control" id="matchesPlayed" name="matchesPlayed" required>
+          </div>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Create Tournament</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Tournament Modal for Dummy Data -->
+<div class="modal fade" id="editTournamentModal-1" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Tournament</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label for="yearEdit" class="form-label">Year</label>
+            <input type="number" class="form-control" id="yearEdit" name="yearEdit" value="2022" required>
+          </div>
+          <div class="mb-3">
+            <label for="hostCountryEdit" class="form-label">Host Country</label>
+            <input type="text" class="form-control" id="hostCountryEdit" name="hostCountryEdit" value="Country A" required>
+          </div>
+          <div class="mb-3">
+            <label for="winnerEdit" class="form-label">Winner</label>
+            <select class="form-control" id="winnerEdit" name="winnerEdit">
+              <option>Team X</option>
+              <option>Team Y</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="runnerUpEdit" class="form-label">Runner-Up</label>
+            <select class="form-control" id="runnerUpEdit" name="runnerUpEdit">
+              <option>Team X</option>
+              <option>Team Y</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="matchesPlayedEdit" class="form-label">Matches Played</label>
+            <input type="number" class="form-control" id="matchesPlayedEdit" name="matchesPlayedEdit" value="10" required>
+          </div>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
