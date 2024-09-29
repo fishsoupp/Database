@@ -2,65 +2,128 @@
 
 {% block title %}World Ranking{% endblock %}
 
+{% block head %}
+    <!-- Link the custom CSS file -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ranking.css') }}">
+{% endblock %}
+
 {% block content %}
 <div class="container mt-5">
     <h2 class="text-left mb-4">World Ranking</h2>
 
-    <!-- Search bar -->
-    <div class="mb-4">
-        <form method="GET" action="{{ url_for('ranking') }}">
-            <div class="input-group">
-                <input type="text" class="form-control" name="q" placeholder="Search by team name" value="{{ search_query }}">
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="submit">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </div>
+    <!-- Ranking Highlights -->
+    <div class="row text-center justify-content-center">
+        <div class="col-md-2 mb-3">
+            <div class="card p-3 h-100 shadow-sm">
+                <h5>Argentina</h5>
+                <p>Top ranked</p>
+                <h3>1st</h3>
             </div>
-        </form>
+        </div>
+        <div class="col-md-2 mb-3">
+            <div class="card p-3 h-100 shadow-sm">
+                <h5>Brunei Darussalam</h5>
+                <p>Biggest climber</p>
+                <h3 class="text-success">+7</h3>
+            </div>
+        </div>
+        <div class="col-md-2 mb-3">
+            <div class="card p-3 h-100 shadow-sm">
+                <h5>Bolivia</h5>
+                <p>Most points scored</p>
+                <h3 class="text-success">+35.2</h3>
+            </div>
+        </div>
+        <div class="col-md-2 mb-3">
+            <div class="card p-3 h-100 shadow-sm">
+                <h5>Qatar</h5>
+                <p>Biggest drop</p>
+                <h3 class="text-danger">-10</h3>
+            </div>
+        </div>
+        <div class="col-md-2 mb-3">
+            <div class="card p-3 h-100 shadow-sm">
+                <h5>Australia</h5>
+                <p>Most points lost</p>
+                <h3 class="text-danger">-26.99</h3>
+            </div>
+        </div>
     </div>
 
-    <!-- Ranking Table -->
+   <!-- Filters: Year and Date (Filter Bar) -->
+    <div class="d-flex justify-content-between align-items-center filter-bar p-3 mb-4 bg-light shadow-sm rounded w-100">
+        <!-- Year Filter -->
+        <div class="d-flex align-items-center me-3">
+            <div class="me-3">
+                <label for="year" class="form-label" style="margin-right: 10px; margin-top: 5px;">Year</label>
+            </div>
+            <div>
+                <select id="year" class="form-select">
+                    <option value="2024">2024</option>
+                    <option value="2023">2023</option>
+                    <option value="2022">2022</option>
+                    <option value="2021">2021</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Date Filter -->
+        <div class="d-flex align-items-center me-3">
+            <div class="me-3">
+                <label for="date" class="form-label" style="margin-right: 10px; margin-top: 5px;">Date</label>
+            </div>
+            <div>
+                <select id="date" class="form-select">
+                    <option value="19 September">19 September</option>
+                    <option value="15 August">15 August</option>
+                    <option value="10 July">10 July</option>
+                    <option value="5 June">5 June</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Reset Button -->
+        <div>
+            <button class="btn btn-primary">Reset filters</button>
+        </div>
+    </div>
+
+</div>
+
+<!-- Ranking Table -->
+<div class="container">
     <table class="table table-hover mt-4">
         <thead>
             <tr>
-                <th>Rank</th>
+                <th>RK</th>
                 <th>Team</th>
-                <th>Matches Won</th>
-                <th>World Cup Wins</th>
+                <th>Total Points</th>
+                <th>Previous Points</th>
+                <th>+/-</th>
+                <th>Match Window</th>
             </tr>
         </thead>
         <tbody>
-            {% for team in teams %}
+            <!-- Row 1 -->
             <tr>
-                <td>{{ loop.index + (page - 1) * per_page }}</td> <!-- Adjust rank for pagination -->
-                <td>{{ team.team_name }}</td>
-                <td>{{ team.matches_won }}</td>
-                <td>{{ team.world_cup_wins }}</td>
+                <td>1</td>
+                <td><img src="{{ url_for('static', filename='images/argentina_flag.png') }}" alt="Argentina Flag" style="width: 30px;"> Argentina</td>
+                <td>1889.02</td>
+                <td>1901.48</td>
+                <td class="text-danger">-12.46</td>
+                <td><span class="badge bg-success">W</span></td>
             </tr>
-            {% endfor %}
+            <!-- Row 2 -->
+            <tr>
+                <td>2</td>
+                <td><img src="{{ url_for('static', filename='images/france_flag.png') }}" alt="France Flag" style="width: 30px;"> France</td>
+                <td>1851.92</td>
+                <td>1854.91</td>
+                <td class="text-danger">-2.99</td>
+                <td><span class="badge bg-success">W</span> <span class="badge bg-danger">L</span></td>
+            </tr>
+            <!-- Additional rows -->
         </tbody>
     </table>
-
-    <!-- Pagination -->
-    <nav aria-label="Page navigation" class="mt-5">
-        <ul class="pagination justify-content-center">
-            {% if page > 1 %}
-            <li class="page-item"><a class="page-link" href="{{ url_for('ranking', page=1) }}">First</a></li>
-            <li class="page-item"><a class="page-link" href="{{ url_for('ranking', page=page-1) }}">Previous</a></li>
-            {% endif %}
-
-            {% for i in range(start_page, end_page + 1) %}
-            <li class="page-item {% if page == i %}active{% endif %}">
-                <a class="page-link" href="{{ url_for('ranking', page=i) }}">{{ i }}</a>
-            </li>
-            {% endfor %}
-
-            {% if page < total_pages %}
-            <li class="page-item"><a class="page-link" href="{{ url_for('ranking', page=page+1) }}">Next</a></li>
-            <li class="page-item"><a class="page-link" href="{{ url_for('ranking', page=total_pages) }}">Last</a></li>
-            {% endif %}
-        </ul>
-    </nav>
 </div>
 {% endblock %}

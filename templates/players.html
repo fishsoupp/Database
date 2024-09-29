@@ -13,54 +13,50 @@
 
     <!-- Search bar -->
     <div class="mb-4">
-        <form method="GET" action="{{ url_for('players') }}">
-            <div class="input-group">
-                <input type="text" name="q" class="form-control" placeholder="Search by name or country" value="{{ search_query }}">
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="submit">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </div>
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search by name or country">
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button">
+                    <i class="fas fa-search"></i>
+                </button>
             </div>
-        </form>
+        </div>
     </div>
-    
 
     <!-- Player cards and modals -->
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4">
-        {% for player in players %}
+        {% for i in range(20) %}
         <div class="col mb-4">
-            <div class="card h-100" data-bs-toggle="modal" data-bs-target="#playerModal{{ player.player_id }}" style="cursor: pointer;">
+            <div class="card h-100" data-bs-toggle="modal" data-bs-target="#playerModal{{ i }}" style="cursor: pointer;">
                 <div class="card-body">
-                    <h6 class="card-title">{{ player.player_name }}</h6>
+                    <h6 class="card-title">Player Name</h6>
                     <p class="card-text">
-                        Country: {{ player.team_name }}<br>
-                        Position: {{ player.position }}<br>
-                        Date of Birth: {{ player.date_of_birth }}<br>
-                        Caps: {{ player.caps }}
+                        Country<br>
+                        DOB
                     </p>
                 </div>
             </div>
         </div>
 
         <!-- Modal for each player -->
-        <div class="modal fade" id="playerModal{{ player.player_id }}" tabindex="-1" aria-labelledby="playerModalLabel{{ player.player_id }}" aria-hidden="true">
+        <div class="modal fade" id="playerModal{{ i }}" tabindex="-1" aria-labelledby="playerModalLabel{{ i }}" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="playerModalLabel{{ player.player_id }}">{{ player.player_name }}</h5>
+                        <h5 class="modal-title" id="playerModalLabel{{ i }}">Player Name</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-md-6">
-                                <p><strong>Country:</strong> {{ player.team_name }}</p>
-                                <p><strong>Date of Birth:</strong> {{ player.date_of_birth }}</p>
-                                <p><strong>Position:</strong> {{ player.position }}</p>
-                                <p><strong>Caps:</strong> {{ player.caps }}</p>
+                                <p><strong>Country:</strong> Player Country</p>
+                                <p><strong>Date of Birth:</strong> DOB</p>
+                                <p><strong>Position:</strong> Position</p>
+                                <p><strong>Club:</strong> Club Name</p>
+                                <p><strong>Nationality:</strong> Nationality</p>
                             </div>
                             <div class="col-md-6">
-                                <canvas id="goalsChart{{ player.player_id }}"></canvas>
+                                <canvas id="goalsChart{{ i }}"></canvas>
                             </div>
                         </div>
                     </div>
@@ -73,53 +69,16 @@
         {% endfor %}
     </div>
 
-    
-    
     <!-- Pagination -->
     <nav aria-label="Page navigation" class="mt-5">
-        <ul class="pagination justify-content-center pagination-container">
-            {% if page > 1 %}
-            <li class="page-item">
-                <a class="page-link" href="{{ url_for('players', page=1) }}">First</a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="{{ url_for('players', page=page-1) }}">Previous</a>
-            </li>
-            {% endif %}
-
-            {% if start_page > 1 %}
-            <li class="page-item">
-                <a class="page-link" href="{{ url_for('players', page=1) }}">1</a>
-            </li>
-            <li class="page-item disabled"><span class="page-link">...</span></li>
-            {% endif %}
-
-            {% for i in range(start_page, end_page + 1) %}
-            <li class="page-item {% if page == i %}active{% endif %}">
-                <a class="page-link" href="{{ url_for('players', page=i) }}">{{ i }}</a>
-            </li>
-            {% endfor %}
-
-            {% if end_page < total_pages %}
-            <li class="page-item disabled"><span class="page-link">...</span></li>
-            <li class="page-item">
-                <a class="page-link" href="{{ url_for('players', page=total_pages) }}">{{ total_pages }}</a>
-            </li>
-            {% endif %}
-
-            {% if page < total_pages %}
-            <li class="page-item">
-                <a class="page-link" href="{{ url_for('players', page=page+1) }}">Next</a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="{{ url_for('players', page=total_pages) }}">Last</a>
-            </li>
-            {% endif %}
+        <ul class="pagination justify-content-center">
+            <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+            <li class="page-item"><a class="page-link" href="#">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            <li class="page-item"><a class="page-link" href="#">Next</a></li>
         </ul>
     </nav>
-
-
-    
 </div>
 {% endblock %}
 
@@ -160,45 +119,3 @@
     });
 </script>
 {% endblock %}
-
-
-<style>
-    /* Ensure pagination buttons stay within the screen */
-    .pagination-container {
-        display: block;
-        max-width: 100%;
-        overflow-x: auto;
-        white-space: nowrap;
-    }
-
-    .pagination {
-        display: inline-flex;
-        flex-wrap: nowrap;
-        justify-content: center;
-        margin-bottom: 0;
-        padding: 0;
-    }
-
-    .pagination li {
-        display: inline-block;
-        margin: 0 2px;
-    }
-
-    .pagination a {
-        white-space: nowrap;
-        padding: 5px 10px;
-    }
-
-    /* Prevent pagination from looking squeezed on smaller screens */
-    @media (max-width: 768px) {
-        .pagination-container {
-            max-width: 100%;
-        }
-
-        .pagination {
-            justify-content: flex-start;
-        }
-    }
-</style>
-
-
