@@ -8,14 +8,16 @@
 
     <!-- Search bar -->
     <div class="mb-4">
-        <div class="input-group">
-            <input type="text" class="form-control" placeholder="Search by name or continent">
-            <div class="input-group-append">
-                <button class="btn btn-outline-secondary" type="button">
-                    <i class="fas fa-search"></i>
-                </button>
+        <form method="GET" action="{{ url_for('teams') }}">
+            <div class="input-group">
+                <input type="text" name="q" class="form-control" placeholder="Search by name or continent" value="{{ search_query }}">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
             </div>
-        </div>
+        </form>
     </div>
 
     <!-- Team cards and modals -->
@@ -45,7 +47,6 @@
                         <p><strong>Team Name:</strong> {{ team.team_name }}</p>
                         <p><strong>FIFA Code:</strong> {{ team.fifa_code }}</p>
                         <p><strong>Continent:</strong> {{ team.continent }}</p>
-                        <!-- You can add more team details here -->
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -56,14 +57,46 @@
         {% endfor %}
     </div>
 
-    <!-- Pagination (optional) -->
+    <!-- Pagination -->
     <nav aria-label="Page navigation" class="mt-5">
         <ul class="pagination justify-content-center">
-            <li class="page-item"><a class="page-link" href="#">Previous</a></li>
-            <li class="page-item"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
-            <li class="page-item"><a class="page-link" href="#">Next</a></li>
+            {% if page > 1 %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('teams', page=1) }}">First</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('teams', page=page-1) }}">Previous</a>
+            </li>
+            {% endif %}
+
+            {% if start_page > 1 %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('teams', page=1) }}">1</a>
+            </li>
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+
+            {% for i in range(start_page, end_page + 1) %}
+            <li class="page-item {% if page == i %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('teams', page=i) }}">{{ i }}</a>
+            </li>
+            {% endfor %}
+
+            {% if end_page < total_pages %}
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('teams', page=total_pages) }}">{{ total_pages }}</a>
+            </li>
+            {% endif %}
+
+            {% if page < total_pages %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('teams', page=page+1) }}">Next</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('teams', page=total_pages) }}">Last</a>
+            </li>
+            {% endif %}
         </ul>
     </nav>
 </div>
