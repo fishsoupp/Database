@@ -13,18 +13,61 @@
 
     <!-- Search bar -->
     <div class="mb-4">
-        <form method="GET" action="{{ url_for('players') }}">
-            <div class="input-group">
-                <input type="text" name="q" class="form-control" placeholder="Search by name or country" value="{{ search_query }}">
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="submit">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </div>
-            </div>
+        <form method="GET" action="{{ url_for('players') }}" class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="Search by name or country" value="{{ search_query }}">
+            <button class="btn btn-outline-secondary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            <!-- Filter Button -->
+            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#filterModal">
+                <i class="fas fa-filter"></i> Filters
+            </button>
         </form>
     </div>
     
+    <!-- Filter Modal -->
+    <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="filterModalLabel">Advanced Filters</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="filterForm">
+                        <!-- Number of Caps with Range Input -->
+                        <div class="mb-3">
+                            <label for="caps" class="form-label">Minimum Caps: <span id="capsValue">0</span></label>
+                            <input type="range" class="form-range" id="caps" name="caps" min="0" max="50" value="0" oninput="document.getElementById('capsValue').textContent = this.value;">
+                        </div>
+                        <!-- Birth Year Selection with Dropdown -->
+                        <div class="mb-3">
+                            <label for="birthYear" class="form-label">Birth Year</label>
+                            <select class="form-control" id="birthYear" name="birth_year">
+                                <option value="">Select a Year</option>
+                                {% for year in range(1900, 2024) %} <!-- Adjust range as needed -->
+                                <option value="{{ year }}">{{ year }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <!-- Country Selection -->
+                        <div class="mb-3">
+                            <label for="country" class="form-label">Country</label>
+                            <select class="form-control" id="country" name="countries[]" multiple>
+                                {% for country in countries %}
+                                <option value="{{ country['team_name'] }}">{{ country['team_name'] }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" onclick="submitFilters()">Apply Filters</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Player cards and modals -->
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4">
@@ -158,6 +201,14 @@
             });
         });
     });
+
+
+    function submitFilters() {
+        var form = document.getElementById("filterForm");
+        var searchParams = new URLSearchParams(new FormData(form)).toString();
+        var currentUrl = window.location.href.split('?')[0]; // Get the base URL without query params
+        window.location.href = currentUrl + "?" + searchParams;
+    }
 </script>
 {% endblock %}
 
