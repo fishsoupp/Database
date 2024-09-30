@@ -410,10 +410,196 @@ def delete_match(match_id):
 
 
 ### Goals Management ###
-@adminRoutes.route("/goals")
-def goals_management():
-    # Serve the goals management page
-    return render_template("adminGoals.html")
+### Goals Management ###
+@adminRoutes.route("/goals", defaults={'page': 1})
+@adminRoutes.route('/goals/page/<int:page>')
+def goals_management(page):
+    per_page = 30  # Number of records to display per page
+    offset = (page - 1) * per_page  # Calculate the offset
+
+    # SQL to fetch goals along with match and team details
+    sql = text("""
+        SELECT
+            g.goal_id,
+            g.player_id,
+            g.match_id,
+            g.minute_scored,
+            g.is_penalty,
+            g.is_own_goal,
+            ht.team_name AS home_team_name,
+            at.team_name AS away_team_name,
+            p.player_name
+        FROM
+            goals g
+        JOIN
+            matches m ON g.match_id = m.match_id
+        JOIN
+            teams ht ON m.home_team_id = ht.team_id
+        JOIN
+            teams at ON m.away_team_id = at.team_id
+        JOIN
+            players p ON g.player_id = p.player_id
+        ORDER BY
+            g.goal_id
+        LIMIT :limit OFFSET :offset
+    """)
+
+    players_sql = text("SELECT player_id, player_name FROM players ORDER BY player_name")
+    matches_sql = text("""
+        SELECT m.match_id, ht.team_name AS home_team_name, at.team_name AS away_team_name, t.year AS tournament_year
+        FROM matches m
+        JOIN teams ht ON m.home_team_id = ht.team_id
+        JOIN teams at ON m.away_team_id = at.team_id
+        JOIN tournaments t ON m.tournament_id = t.tournament_id
+        ORDER BY m.match_id
+    """)
+
+    # SQL to count total number of goals
+    count_sql = text("SELECT COUNT(*) FROM goals")
+
+    with db.engine.connect() as conn:
+        result = conn.execute(sql, {'limit': per_page, 'offset': offset})
+        goals = []
+        for row in result:
+            goals.append({
+                'goal_id': row.goal_id,
+                'player_name': row.player_name,
+                'match_id': row.match_id,
+                'home_team_name': row.home_team_name,
+                'away_team_name': row.away_team_name,
+                'minute_scored': f"{row.minute_scored}'",
+                'is_penalty': row.is_penalty,
+                'is_own_goal': row.is_own_goal
+            })
+
+        players = [{'player_id': row.player_id, 'player_name': row.player_name} for row in conn.execute(players_sql)]
+        matches = [{'match_id': row.match_id, 'home_team_name': row.home_team_name, 'away_team_name': row.away_team_name, 'tournament_year': row.tournament_year} for row in conn.execute(matches_sql)]
+
+        total_goals = conn.execute(count_sql).scalar()
+
+    total_pages = (total_goals // per_page) + (1 if total_goals % per_page > 0 else 0)
+
+    # Adjust the range of visible pages
+    if page > total_pages:
+        page = total_pages
+    visible_pages = 5  # This can be adjusted as needed
+    start_page = max(1, page - visible_pages // 2)
+    end_page = min(total_pages, start_page + visible_pages - 1)
+
+    if end_page - start_page < visible_pages and start_page > 1:
+        start_page = max(1, end_page - visible_pages + 1)
+
+    return render_template("adminGoals.html", goals=goals, players=players, matches=matches, page=page, total_pages=total_pages, start_page=start_page, end_page=end_page)
+
+
+@adminRoutes.route('/goals/add', methods=['POST'])
+def add_goal():
+    if request.method == 'POST':
+        # Get form data from the request
+        player_id = request.form.get('player', type=int)
+        match_id = request.form.get('match', type=int)
+        minute_scored = request.form.get('minute', type=int)
+        is_penalty = 'penalty' in request.form  # Checkbox handling: True if checked, False otherwise
+        is_own_goal = 'ownGoal' in request.form  # Checkbox handling: True if checked, False otherwise
+
+        # Construct the raw SQL query to insert a new goal
+        sql = text("""
+            INSERT INTO goals (player_id, match_id, minute_scored, is_penalty, is_own_goal)
+            VALUES (:player_id, :match_id, :minute_scored, :is_penalty, :is_own_goal)
+        """)
+
+        try:
+            with db.engine.connect() as conn:
+                conn.execute(sql, {
+                    'player_id': player_id,
+                    'match_id': match_id,
+                    'minute_scored': minute_scored,
+                    'is_penalty': is_penalty,
+                    'is_own_goal': is_own_goal
+                })
+                conn.commit()  # Commit the transaction
+                flash('Goal recorded successfully!', 'success')
+        except Exception as e:
+            current_app.logger.error(f"Error adding goal: {str(e)}", exc_info=True)
+            flash(f"Error adding goal: {str(e)}", 'danger')
+
+        return redirect(url_for('adminRoutes.goals_management'))  # Redirect to the goals management page
+
+    # If there are any issues with the POST request
+    flash('Failed to record the goal. Please try again.', 'danger')
+    return redirect(url_for('adminRoutes.goals_management'))
+
+
+@adminRoutes.route('/goals/update/<int:goal_id>', methods=['POST'])
+def update_goal(goal_id):
+    # Fetch the form data
+    player_id = request.form.get('player', type=int)
+    match_id = request.form.get('match', type=int)
+    minute_scored = request.form.get('minute', type=str)  # Keep it as a string if you want to add the apostrophe after.
+    is_penalty = request.form.get('penalty') is not None  # Checkbox is checked if it is present in the form.
+    is_own_goal = request.form.get('ownGoal') is not None  # Checkbox is checked if it is present in the form.
+
+    # Construct the raw SQL query to update the goal record
+    sql = text("""
+        UPDATE goals
+        SET player_id = :player_id,
+            match_id = :match_id,
+            minute_scored = :minute_scored,
+            is_penalty = :is_penalty,
+            is_own_goal = :is_own_goal
+        WHERE goal_id = :goal_id
+    """)
+
+    # Construct SQL parameters
+    params = {
+        'player_id': player_id,
+        'match_id': match_id,
+        'minute_scored': minute_scored,
+        'is_penalty': is_penalty,
+        'is_own_goal': is_own_goal,
+        'goal_id': goal_id
+    }
+
+    try:
+        # Execute the SQL query
+        with db.engine.connect() as conn:
+            conn.execute(sql, params)
+            conn.commit()  # Commit the changes
+
+            # Flash success message
+            flash(f"Goal {goal_id} updated successfully!", 'success')
+
+    except Exception as e:
+        # Handle any exceptions and log the error
+        current_app.logger.error(f"Error updating goal: {str(e)}", exc_info=True)
+        flash(f"Error updating goal: {str(e)}", 'danger')
+
+    # Redirect back to the goals management page
+    return redirect(url_for('adminRoutes.goals_management'))
+
+
+@adminRoutes.route('/goals/delete/<int:goal_id>', methods=['POST'])
+def delete_goal(goal_id):
+    # Construct the SQL query to delete the goal by goal_id
+    sql = text("DELETE FROM goals WHERE goal_id = :goal_id")
+
+    try:
+        # Execute the delete operation
+        with db.engine.connect() as conn:
+            conn.execute(sql, {'goal_id': goal_id})
+            conn.commit()  # Commit the transaction
+
+            # Flash success message
+            flash(f"Goal with ID {goal_id} deleted successfully!", 'success')
+
+    except Exception as e:
+        # Handle any exceptions and log the error
+        current_app.logger.error(f"Error deleting goal: {str(e)}", exc_info=True)
+        flash(f"Error deleting goal: {str(e)}", 'danger')
+
+    # Redirect back to the goals management page
+    return redirect(url_for('adminRoutes.goals_management'))
+
 
 
 ### Tournaments Management ###
