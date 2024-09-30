@@ -1,11 +1,11 @@
 from flask import Flask, redirect, url_for, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
+from flask_bcrypt import Bcrypt
 from sqlalchemy.sql import text
 from math import ceil
 import json
 from decimal import Decimal
-
 
 from os import getenv
 from dotenv import load_dotenv
@@ -16,7 +16,7 @@ load_dotenv()
 app = Flask(__name__)
 
 
-
+bcrypt = Bcrypt(app)
 
 #Configuration for PostgreSQL database
 app.config['SQLALCHEMY_DATABASE_URI'] = getenv('DATABASE_URL')
@@ -150,7 +150,8 @@ def home():
         total_teams = connection.execute(query_total_teams, {"search_filter": search_filter}).scalar()
 
     # Calculate total pages based on total teams for radar charts
-    total_radar_pages = (total_teams + radar_chart_per_page - 1) // radar_chart_per_page
+    # total_radar_pages = (total_teams + radar_chart_per_page - 1) // radar_chart_per_page
+    total_pages = (total_teams + per_page - 1) // per_page 
 
     # Render the template with the relevant data
     return render_template(
@@ -161,7 +162,7 @@ def home():
         most_cards=most_cards,
         teams_data=json.dumps(teams_data, default=decimal_default),  # Limited to 18 teams
         page=page,
-        total_pages=total_radar_pages,  # Used for radar chart pagination
+        total_pages=total_pages,  # Used for radar chart pagination
         search_query=search_query
     )
 
@@ -287,9 +288,9 @@ def teams_radar(page):
 
 
 
-@app.route('/index')
-def index():
-    return render_template("index.html")
+# @app.route('/index')
+# def index():
+#     return render_template("index.html")
 
 @app.route('/ranking', defaults={'page': 1})
 @app.route('/ranking/page/<int:page>')
