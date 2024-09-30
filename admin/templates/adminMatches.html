@@ -11,30 +11,79 @@
   <thead>
     <tr>
       <th>Match ID</th>
-      <th>Tournament</th>
+      <th>Tournament Year</th> 
       <th>Home Team</th>
       <th>Away Team</th>
-      <th>Stadium</th>
-      <th>Score</th>
+      <th>Venue</th> 
+      <th>Score</th> 
+      <th>Round</th> 
+      <th>Referee</th>
       <th>Actions</th>
     </tr>
   </thead>
   <tbody>
-    <!-- Dummy Data for Matches -->
+    {% for match in matches %}
     <tr>
-      <td>1</td>
-      <td>Tournament A</td>
-      <td>Team X</td>
-      <td>Team Y</td>
-      <td>Stadium Z</td>
-      <td>2-1</td>
+      <td>{{ match.match_id }}</td>
+      <td>{{ match.tournament_year }}</td>
+      <td>{{ match.home_team_name }}</td>
+      <td>{{ match.away_team_name }}</td>
+      <td>{{ match.stadium_name }}</td>
+      <td>{{ match.home_team_goals }}-{{ match.away_team_goals }}</td>
+      <td>{{ match.round }}</td>
+      <td>{{ match.referee_name }}</td>
       <td>
-        <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editMatchModal-1">Edit</button>
-        <button class="btn btn-sm btn-danger">Delete</button>
+        <!-- <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editMatchModal-{{ match.match_id }}">Edit</button>
+        <button class="btn btn-sm btn-danger">Delete</button> -->
       </td>
     </tr>
+    {% endfor %}
   </tbody>
 </table>
+
+<!-- Pagination -->
+<nav aria-label="Page navigation" class="mt-5">
+  <ul class="pagination justify-content-center pagination-container">
+      {% if page > 1 %}
+      <li class="page-item">
+          <a class="page-link" href="{{ url_for('adminRoutes.matches_management', page=1) }}">First</a>
+      </li>
+      <li class="page-item">
+          <a class="page-link" href="{{ url_for('adminRoutes.matches_management', page=page-1) }}">Previous</a>
+      </li>
+      {% endif %}
+
+      {% if start_page > 1 %}
+      <li class="page-item">
+          <a class="page-link" href="{{ url_for('adminRoutes.matches_management', page=1) }}">1</a>
+      </li>
+      <li class="page-item disabled"><span class="page-link">...</span></li>
+      {% endif %}
+
+      {% for i in range(start_page, end_page + 1) %}
+      <li class="page-item {% if page == i %}active{% endif %}">
+          <a class="page-link" href="{{ url_for('adminRoutes.matches_management', page=i) }}">{{ i }}</a>
+      </li>
+      {% endfor %}
+
+      {% if end_page < total_pages %}
+      <li class="page-item disabled"><span class="page-link">...</span></li>
+      <li class="page-item">
+          <a class="page-link" href="{{ url_for('adminRoutes.matches_management', page=total_pages) }}">{{ total_pages }}</a>
+      </li>
+      {% endif %}
+
+      {% if page < total_pages %}
+      <li class="page-item">
+          <a class="page-link" href="{{ url_for('adminRoutes.matches_management', page=page+1) }}">Next</a>
+      </li>
+      <li class="page-item">
+          <a class="page-link" href="{{ url_for('adminRoutes.matches_management', page=total_pages) }}">Last</a>
+      </li>
+      {% endif %}
+  </ul>
+</nav>
+
 
 <!-- Create Match Modal -->
 <div class="modal fade" id="createMatchModal" tabindex="-1">
@@ -45,83 +94,65 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <form>
+        <form action="{{ url_for('adminRoutes.add_match') }}" method="post">
           <div class="mb-3">
             <label for="tournament" class="form-label">Tournament</label>
             <select class="form-control" id="tournament" name="tournament">
-              <option>Tournament A</option>
-              <option>Tournament B</option>
+              <option value="" disabled selected>Please select a year</option>
+              {% for tournament in tournaments %}
+              <option value="{{ tournament.tournament_id }}">{{ tournament.tournament_year }}</option>
+              {% endfor %}
             </select>
           </div>
           <div class="mb-3">
             <label for="homeTeam" class="form-label">Home Team</label>
             <select class="form-control" id="homeTeam" name="homeTeam">
-              <option>Team X</option>
-              <option>Team Y</option>
+              <option value="" disabled selected>Please select a team</option>
+              {% for team in teams %}
+              <option value="{{ team.team_id }}">{{ team.team_name }}</option>
+              {% endfor %}
             </select>
           </div>
           <div class="mb-3">
             <label for="awayTeam" class="form-label">Away Team</label>
             <select class="form-control" id="awayTeam" name="awayTeam">
-              <option>Team X</option>
-              <option>Team Y</option>
+              <option value="" disabled selected>Please select a team</option>
+              {% for team in teams %}
+              <option value="{{ team.team_id }}">{{ team.team_name }}</option>
+              {% endfor %}
             </select>
           </div>
           <div class="mb-3">
             <label for="stadium" class="form-label">Stadium</label>
-            <input type="text" class="form-control" id="stadium" name="stadium" required>
-          </div>
-          <div class="mb-3">
-            <label for="score" class="form-label">Score</label>
-            <input type="text" class="form-control" id="score" name="score" required>
-          </div>
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Add Match</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Edit Match Modal for Dummy Data -->
-<div class="modal fade" id="editMatchModal-1" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Edit Match</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <form>
-          <div class="mb-3">
-            <label for="tournamentEdit" class="form-label">Tournament</label>
-            <select class="form-control" id="tournamentEdit" name="tournamentEdit">
-              <option>Tournament A</option>
-              <option>Tournament B</option>
+            <select class="form-control" id="stadium" name="stadium">
+              <option value="" disabled selected>Please select a stadium</option>
+              {% for stadium in stadiums %}
+              <option value="{{ stadium.stadium_id }}">{{ stadium.stadium_name }}</option>
+              {% endfor %}
             </select>
           </div>
           <div class="mb-3">
-            <label for="homeTeamEdit" class="form-label">Home Team</label>
-            <select class="form-control" id="homeTeamEdit" name="homeTeamEdit">
-              <option>Team X</option>
-              <option>Team Y</option>
+            <label for="round" class="form-label">Round</label>
+            <input type="text" class="form-control" id="round" name="round" required>
+          </div>
+          <div class="mb-3">
+            <label for="referee" class="form-label">Referee</label>
+            <select class="form-control" id="referee" name="referee">
+              <option value="" disabled selected>Please select a referee</option>
+              {% for referee in referees %}
+              <option value="{{ referee.referee_id }}">{{ referee.referee_name }}</option>
+              {% endfor %}
             </select>
+          </div>          
+          <div class="mb-3">
+            <label for="home_team_goals" class="form-label">Home Team Goals</label>
+            <input type="number" class="form-control" id="home_team_goals" name="home_team_goals" required>
           </div>
           <div class="mb-3">
-            <label for="awayTeamEdit" class="form-label">Away Team</label>
-            <select class="form-control" id="awayTeamEdit" name="awayTeamEdit">
-              <option>Team X</option>
-              <option>Team Y</option>
-            </select>
+            <label for="away_team_goals" class="form-label">Away Team Goals</label>
+            <input type="number" class="form-control" id="away_team_goals" name="away_team_goals" required>
           </div>
-          <div class="mb-3">
-            <label for="stadiumEdit" class="form-label">Stadium</label>
-            <input type="text" class="form-control" id="stadiumEdit" name="stadiumEdit" value="Stadium Z" required>
-          </div>
-          <div class="mb-3">
-            <label for="scoreEdit" class="form-label">Score</label>
-            <input type="text" class="form-control" id="scoreEdit" name="scoreEdit" value="2-1" required>
-          </div>
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Save Changes</button>
+          <button type="submit" class="btn btn-primary">Add Match</button>
         </form>
       </div>
     </div>

@@ -2,29 +2,42 @@
 
 {% block title %}Admin Login{% endblock %}
 
-{% block extra_head %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
-{% endblock %}
-
 {% block content %}
-<div class="d-flex align-items-center justify-content-center" style="min-height: calc(100vh - 56px);"> 
-    <div class="card p-4 shadow-lg" style="max-width: 400px; width: 100%; background-color: white;">
-        <h3 class="mb-4 text-center">Admin Login</h3>
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <div class="card p-4 shadow" style="width: 400px;">
+        <h3 class="text-center mb-4">Admin Login</h3>
         <form method="POST">
             {{ form.hidden_tag() }}
             <div class="mb-3">
                 {{ form.username.label(class="form-label") }}
                 {{ form.username(class="form-control") }}
+                {% if form.username.errors %}
+                    <div class="text-danger">
+                        {% for error in form.username.errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
+
             <div class="mb-3">
                 {{ form.password.label(class="form-label") }}
                 {{ form.password(class="form-control") }}
+                {% if form.password.errors %}
+                    <div class="text-danger">
+                        {% for error in form.password.errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
+
             <div class="form-check mb-3">
-                {{ form.remember.label(class="form-check-label") }}
                 {{ form.remember(class="form-check-input") }}
+                {{ form.remember.label(class="form-check-label") }}
             </div>
-            <button type="submit" class="btn btn-primary w-100">{{ form.submit.label }}</button>
+
+            <button type="submit" class="btn btn-primary w-100">Sign in</button>
         </form>
     </div>
 </div>
