@@ -410,7 +410,6 @@ def delete_match(match_id):
 
 
 ### Goals Management ###
-### Goals Management ###
 @adminRoutes.route("/goals", defaults={'page': 1})
 @adminRoutes.route('/goals/page/<int:page>')
 def goals_management(page):
@@ -603,8 +602,149 @@ def delete_goal(goal_id):
 
 
 ### Tournaments Management ###
-@adminRoutes.route("/tournaments")
-def tournaments_management():
-    # Serve the tournaments management page
-    return render_template("adminTournaments.html")
+@adminRoutes.route("/tournaments", defaults={'page': 1})
+@adminRoutes.route('/tournaments/page/<int:page>')
+def tournaments_management(page):
+    per_page = 30  # Number of records to display per page
+    offset = (page - 1) * per_page  # Calculate the offset
 
+    # SQL to fetch tournaments along with team details
+    sql = text("""
+        SELECT
+            t.tournament_id,
+            t.year,
+            t.host_country,
+            t.winner_team_id,
+            t.runner_up_team_id,
+            t.matches_played,
+            ht.team_name AS winner_team_name,
+            at.team_name AS runner_up_name
+        FROM
+            tournaments t
+        JOIN
+            teams ht ON t.winner_team_id = ht.team_id
+        JOIN
+            teams at ON t.runner_up_team_id = at.team_id
+        ORDER BY
+             t.tournament_id
+        LIMIT :limit OFFSET :offset
+    """)
+
+    teams_sql = text("SELECT team_id, team_name FROM teams ORDER BY team_name")
+        
+    # SQL to count total number of tournaments
+    count_sql = text("SELECT COUNT(*) FROM tournaments")
+
+    with db.engine.connect() as conn:
+        result = conn.execute(sql, {'limit': per_page, 'offset': offset})
+        tournaments = []
+        for row in result:
+            tournaments.append({
+                'tournament_id': row.tournament_id,
+                'year': row.year,
+                'host_country': row.host_country,
+                'winner_team_name': row.winner_team_name,
+                'runner_up_name': row.runner_up_name,
+                'matches_played': row.matches_played
+            })
+
+        total_tournaments = conn.execute(count_sql).scalar()
+
+        teams = [{'team_id': row.team_id, 'team_name': row.team_name} for row in conn.execute(teams_sql)]
+
+    total_pages = (total_tournaments // per_page) + (1 if total_tournaments % per_page > 0 else 0)
+
+    # Adjust the range of visible pages
+    if page > total_pages:
+        page = total_pages
+    visible_pages = 5  # This can be adjusted as needed
+    start_page = max(1, page - visible_pages // 2)
+    end_page = min(total_pages, start_page + visible_pages - 1)
+
+    if end_page - start_page < visible_pages and start_page > 1:
+        start_page = max(1, end_page - visible_pages + 1)
+
+    return render_template("adminTournaments.html", tournaments=tournaments, teams=teams, page=page, total_pages=total_pages, start_page=start_page, end_page=end_page)
+
+
+@adminRoutes.route('/tournaments/add', methods=['POST'])
+def add_tournament():
+    if request.method == 'POST':
+        year = request.form.get('year')
+        host_country = request.form.get('hostCountry')
+        winner_team_id = request.form.get('winner')
+        runner_up_team_id = request.form.get('runnerUp')
+        matches_played = request.form.get('matchesPlayed')
+
+        sql = text("""
+            INSERT INTO tournaments (year, host_country, winner_team_id, runner_up_team_id, matches_played)
+            VALUES (:year, :host_country, :winner_team_id, :runner_up_team_id, :matches_played)
+        """)
+
+        try:
+            with db.engine.connect() as conn:
+                conn.execute(sql, {
+                    'year': year,
+                    'host_country': host_country,
+                    'winner_team_id': winner_team_id,
+                    'runner_up_team_id': runner_up_team_id,
+                    'matches_played': matches_played
+                })
+                conn.commit()
+                flash('Tournament added successfully!', 'success')
+        except Exception as e:
+            current_app.logger.error(f"Error adding tournament: {str(e)}", exc_info=True)
+            flash(f"Error adding tournament: {str(e)}", 'danger')
+
+        return redirect(url_for('adminRoutes.tournaments_management'))
+
+
+@adminRoutes.route('/tournaments/update/<int:tournament_id>', methods=['POST'])
+def update_tournament(tournament_id):
+    if request.method == 'POST':
+        year = request.form.get('year')
+        host_country = request.form.get('hostCountry')
+        winner_team_id = request.form.get('winner')
+        runner_up_team_id = request.form.get('runnerUp')
+        matches_played = request.form.get('matchesPlayed')
+
+        sql = text("""
+            UPDATE tournaments
+            SET year = :year, host_country = :host_country, winner_team_id = :winner_team_id, 
+                runner_up_team_id = :runner_up_team_id, matches_played = :matches_played
+            WHERE tournament_id = :tournament_id
+        """)
+
+        try:
+            with db.engine.connect() as conn:
+                conn.execute(sql, {
+                    'tournament_id': tournament_id,
+                    'year': year,
+                    'host_country': host_country,
+                    'winner_team_id': winner_team_id,
+                    'runner_up_team_id': runner_up_team_id,
+                    'matches_played': matches_played
+                })
+                conn.commit()
+                flash(f"Tournament {tournament_id} updated successfully!", 'success')
+        except Exception as e:
+            current_app.logger.error(f"Error updating tournament: {str(e)}", exc_info=True)
+            flash(f"Error updating tournament: {str(e)}", 'danger')
+
+        return redirect(url_for('adminRoutes.tournaments_management'))
+
+
+@adminRoutes.route('/tournaments/delete/<int:tournament_id>', methods=['POST'])
+def delete_tournament(tournament_id):
+    sql = text("DELETE FROM tournaments WHERE tournament_id = :tournament_id")
+
+    try:
+        with db.engine.connect() as conn:
+            conn.execute(sql, {'tournament_id': tournament_id})
+            conn.commit()
+            flash(f"Tournament {tournament_id} deleted successfully!", 'success')
+    except Exception as e:
+        current_app.logger.error(f"Error deleting tournament: {str(e)}", exc_info=True)
+        flash(f"Error deleting tournament: {str(e)}", 'danger')
+
+    return redirect(url_for('adminRoutes.tournaments_management'))

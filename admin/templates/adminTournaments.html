@@ -20,21 +20,66 @@
     </tr>
   </thead>
   <tbody>
-    <!-- Dummy Data for Tournaments -->
+    {% for tournament in tournaments %}
     <tr>
-      <td>1</td>
-      <td>2022</td>
-      <td>Country A</td>
-      <td>Team X</td>
-      <td>Team Y</td>
-      <td>10</td>
+      <td>{{ tournament.tournament_id }}</td>
+      <td>{{ tournament.year }}</td>
+      <td>{{ tournament.host_country }}</td>
+      <td>{{ tournament.winner_team_name }}</td>
+      <td>{{ tournament.runner_up_name }}</td>
+      <td>{{ tournament.matches_played }}</td>
       <td>
-        <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editTournamentModal-1">Edit</button>
-        <button class="btn btn-sm btn-danger">Delete</button>
+        <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editTournamentModal-{{ tournament.tournament_id }}">Edit</button>
+        <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteTournamentModal-{{ tournament.tournament_id }}">Delete</button>
       </td>
     </tr>
+    {% endfor %}
   </tbody>
 </table>
+
+<!-- Pagination -->
+<nav aria-label="Page navigation" class="mt-5">
+  <ul class="pagination justify-content-center pagination-container">
+      {% if page > 1 %}
+      <li class="page-item">
+          <a class="page-link" href="{{ url_for('adminRoutes.goals_management', page=1) }}">First</a>
+      </li>
+      <li class="page-item">
+          <a class="page-link" href="{{ url_for('adminRoutes.goals_management', page=page-1) }}">Previous</a>
+      </li>
+      {% endif %}
+
+      {% if start_page > 1 %}
+      <li class="page-item">
+          <a class="page-link" href="{{ url_for('adminRoutes.goals_management', page=1) }}">1</a>
+      </li>
+      <li class="page-item disabled"><span class="page-link">...</span></li>
+      {% endif %}
+
+      {% for i in range(start_page, end_page + 1) %}
+      <li class="page-item {% if page == i %}active{% endif %}">
+          <a class="page-link" href="{{ url_for('adminRoutes.goals_management', page=i) }}">{{ i }}</a>
+      </li>
+      {% endfor %}
+
+      {% if end_page < total_pages %}
+      <li class="page-item disabled"><span class="page-link">...</span></li>
+      <li class="page-item">
+          <a class="page-link" href="{{ url_for('adminRoutes.goals_management', page=total_pages) }}">{{ total_pages }}</a>
+      </li>
+      {% endif %}
+
+      {% if page < total_pages %}
+      <li class="page-item">
+          <a class="page-link" href="{{ url_for('adminRoutes.goals_management', page=page+1) }}">Next</a>
+      </li>
+      <li class="page-item">
+          <a class="page-link" href="{{ url_for('adminRoutes.goals_management', page=total_pages) }}">Last</a>
+      </li>
+      {% endif %}
+  </ul>
+</nav>
+
 
 <!-- Create Tournament Modal -->
 <div class="modal fade" id="createTournamentModal" tabindex="-1">
@@ -45,7 +90,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <form>
+        <form action="{{ url_for('adminRoutes.add_tournament') }}" method="post">
           <div class="mb-3">
             <label for="year" class="form-label">Year</label>
             <input type="number" class="form-control" id="year" name="year" required>
@@ -57,30 +102,34 @@
           <div class="mb-3">
             <label for="winner" class="form-label">Winner</label>
             <select class="form-control" id="winner" name="winner">
-              <option>Team X</option>
-              <option>Team Y</option>
+              {% for team in teams %}
+              <option value="{{ team.team_id }}">{{ team.team_name }}</option>
+              {% endfor %}
             </select>
           </div>
           <div class="mb-3">
             <label for="runnerUp" class="form-label">Runner-Up</label>
             <select class="form-control" id="runnerUp" name="runnerUp">
-              <option>Team X</option>
-              <option>Team Y</option>
+              {% for team in teams %}
+              <option value="{{ team.team_id }}">{{ team.team_name }}</option>
+              {% endfor %}
             </select>
           </div>
           <div class="mb-3">
             <label for="matchesPlayed" class="form-label">Matches Played</label>
             <input type="number" class="form-control" id="matchesPlayed" name="matchesPlayed" required>
           </div>
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Create Tournament</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Tournament</button>
         </form>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Edit Tournament Modal for Dummy Data -->
-<div class="modal fade" id="editTournamentModal-1" tabindex="-1">
+<!-- Edit Tournament Modal for each tournament -->
+{% for tournament in tournaments %}
+<div class="modal fade" id="editTournamentModal-{{ tournament.tournament_id }}" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -88,38 +137,63 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <form>
+        <form action="{{ url_for('adminRoutes.update_tournament', tournament_id=tournament.tournament_id) }}" method="post">
           <div class="mb-3">
             <label for="yearEdit" class="form-label">Year</label>
-            <input type="number" class="form-control" id="yearEdit" name="yearEdit" value="2022" required>
+            <input type="number" class="form-control" id="yearEdit-{{ tournament.tournament_id }}" name="year" value="{{ tournament.year }}" required>
           </div>
           <div class="mb-3">
             <label for="hostCountryEdit" class="form-label">Host Country</label>
-            <input type="text" class="form-control" id="hostCountryEdit" name="hostCountryEdit" value="Country A" required>
+            <input type="text" class="form-control" id="hostCountryEdit-{{ tournament.tournament_id }}" name="hostCountry" value="{{ tournament.host_country }}" required>
           </div>
           <div class="mb-3">
             <label for="winnerEdit" class="form-label">Winner</label>
-            <select class="form-control" id="winnerEdit" name="winnerEdit">
-              <option>Team X</option>
-              <option>Team Y</option>
+            <select class="form-control" id="winnerEdit-{{ tournament.tournament_id }}" name="winner">
+              {% for team in teams %}
+              <option value="{{ team.team_id }}" {% if tournament.winner_team_id == team.team_id %}selected{% endif %}>{{ team.team_name }}</option>
+              {% endfor %}
             </select>
           </div>
           <div class="mb-3">
             <label for="runnerUpEdit" class="form-label">Runner-Up</label>
-            <select class="form-control" id="runnerUpEdit" name="runnerUpEdit">
-              <option>Team X</option>
-              <option>Team Y</option>
-            </select>
+            <select class="form-control" id="runnerUpEdit-{{ tournament.tournament_id }}" name="runnerUp">
+              {% for team in teams %}
+              <option value="{{ team.team_id }}" {% if tournament.runner_up_team_id == team.team_id %}selected{% endif %}>{{ team.team_name }}</option>
+              {% endfor %}
+            select>
           </div>
           <div class="mb-3">
             <label for="matchesPlayedEdit" class="form-label">Matches Played</label>
-            <input type="number" class="form-control" id="matchesPlayedEdit" name="matchesPlayedEdit" value="10" required>
+            <input type="number" class="form-control" id="matchesPlayedEdit-{{ tournament.tournament_id }}" name="matchesPlayed" value="{{ tournament.matches_played }}" required>
           </div>
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Save Changes</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
         </form>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Delete Tournament Modal -->
+<div class="modal fade" id="deleteTournamentModal-{{ tournament.tournament_id }}" tabindex="-1" aria-labelledby="deleteTournamentLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteTournamentLabel">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete the tournament "{{ tournament.year }} - {{ tournament.host_country }}"?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form action="{{ url_for('adminRoutes.delete_tournament', tournament_id=tournament.tournament_id) }}" method="POST">
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
 
 {% endblock %}
