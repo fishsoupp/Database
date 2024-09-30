@@ -3,48 +3,14 @@
 {% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
-<!-- Dashboard Cards -->
 <h2 class="mb-4">Overview</h2>
 
 <div class="row">
-    <!-- Total Matches Played -->
     <div class="col-lg-6 col-md-6 mb-4">
         <div class="card shadow">
             <div class="card-body">
-                <h5>Total Matches Played</h5>
-                <canvas id="totalMatchesGraph"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <!-- Total Goals -->
-    <div class="col-lg-6 col-md-6 mb-4">
-        <div class="card shadow">
-            <div class="card-body">
-                <h5>Total Goals</h5>
+                <h5>Total Goals by Teams in Latest Tournament</h5>
                 <canvas id="totalGoalsGraph"></canvas>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <!-- Top Scorer -->
-    <div class="col-lg-6 col-md-6 mb-4">
-        <div class="card shadow">
-            <div class="card-body" style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
-                <h5>Top Scorer</h5>
-                <canvas id="topScorerGraph"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <!-- Next Match -->
-    <div class="col-lg-6 col-md-6 mb-4">
-        <div class="card shadow">
-            <div class="card-body" style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
-                <h5>Recent Match</h5>
-                <canvas id="nextMatchGraph"></canvas>
             </div>
         </div>
     </div>
@@ -54,38 +20,17 @@
 
 {% block extra_scripts %}
 <script>
-    // Graph for Total Matches Played
-    const ctxMatches = document.getElementById('totalMatchesGraph').getContext('2d');
-    const totalMatchesChart = new Chart(ctxMatches, {
-        type: 'bar', // Bar chart for total matches played
-        data: {
-            labels: ['Matches Played'],
-            datasets: [{
-                label: 'Total Matches Played',
-                data: [20], // Example data
-                backgroundColor: ['rgba(54, 162, 235, 0.5)'],
-                borderColor: ['rgba(54, 162, 235, 1)'],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                y: { beginAtZero: true }
-            }
-        }
-    });
-
-    // Graph for Total Goals
+    // Graph for Total Goals by Teams in Latest Tournament
     const ctxGoals = document.getElementById('totalGoalsGraph').getContext('2d');
     const totalGoalsChart = new Chart(ctxGoals, {
-        type: 'bar', // Bar chart for total goals
+        type: 'bar', // Bar chart for total goals by teams
         data: {
-            labels: ['Goals Scored'],
+            labels: {{ teams|tojson }}, // Team names passed from the backend
             datasets: [{
                 label: 'Total Goals',
-                data: [50], // Example data
-                backgroundColor: ['rgba(255, 99, 132, 0.5)'],
-                borderColor: ['rgba(255, 99, 132, 1)'],
+                data: {{ goals|tojson }}, // Goals data passed from the backend
+                backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                borderColor: 'rgba(255, 99, 132, 1)',
                 borderWidth: 1
             }]
         },
@@ -93,56 +38,6 @@
             scales: {
                 y: { beginAtZero: true }
             }
-        }
-    });
-
-    // Graph for Top Scorer
-    const ctxScorer = document.getElementById('topScorerGraph').getContext('2d');
-    const topScorerChart = new Chart(ctxScorer, {
-        type: 'doughnut', // Doughnut chart for top scorer
-        data: {
-            labels: ['Player X', 'Other Players'],
-            datasets: [{
-                label: 'Top Scorer',
-                data: [10, 40], // Example: Player X has 10 goals, others combined have 40 goals
-                backgroundColor: [
-                    'rgba(75, 192, 192, 0.5)',
-                    'rgba(153, 102, 255, 0.5)'
-                ],
-                borderColor: [
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-        }
-    });
-
-    // Graph for Next Match
-    const ctxMatch = document.getElementById('nextMatchGraph').getContext('2d');
-    const nextMatchChart = new Chart(ctxMatch, {
-        type: 'pie', // Pie chart for next match
-        data: {
-            labels: ['Team A', 'Team B'],
-            datasets: [{
-                label: 'Next Match Teams',
-                data: [50, 50], // Example: 50% for each team
-                backgroundColor: [
-                    'rgba(255, 206, 86, 0.5)',
-                    'rgba(54, 162, 235, 0.5)'
-                ],
-                borderColor: [
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(54, 162, 235, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
         }
     });
 </script>

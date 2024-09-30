@@ -2,24 +2,31 @@
 
 {% block title %}Admin Login{% endblock %}
 
+{% block extra_head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+{% endblock %}
+
 {% block content %}
 <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
     <div class="card p-4 shadow" style="width: 400px;">
         <h3 class="text-center mb-4">Admin Login</h3>
         <form method="POST">
             {{ form.hidden_tag() }}
+            
+            <!-- Email Field -->
             <div class="mb-3">
-                {{ form.username.label(class="form-label") }}
-                {{ form.username(class="form-control") }}
-                {% if form.username.errors %}
+                {{ form.email.label(class="form-label") }}
+                {{ form.email(class="form-control") }}
+                {% if form.email.errors %}
                     <div class="text-danger">
-                        {% for error in form.username.errors %}
+                        {% for error in form.email.errors %}
                             <small>{{ error }}</small>
                         {% endfor %}
                     </div>
                 {% endif %}
             </div>
-
+            
+            <!-- Password Field -->
             <div class="mb-3">
                 {{ form.password.label(class="form-label") }}
                 {{ form.password(class="form-control") }}
@@ -31,12 +38,14 @@
                     </div>
                 {% endif %}
             </div>
-
+            
+            <!-- Remember Me Checkbox -->
             <div class="form-check mb-3">
                 {{ form.remember(class="form-check-input") }}
                 {{ form.remember.label(class="form-check-label") }}
             </div>
 
+            <!-- Submit Button -->
             <button type="submit" class="btn btn-primary w-100">Sign in</button>
         </form>
     </div>
