@@ -193,30 +193,67 @@ def teams(page):
 @app.route('/players/page/<int:page>')
 def players(page):
     search_query = request.args.get('q', '')  # Get search term from query parameters
+    caps = request.args.get('caps', None, type=int)  # Get caps filter
+    birth_year = request.args.get('birth_year', None, type=int)  # Get birth year filter
+    countries = request.args.getlist('countries[]')  # Get selected countries (array of countries)
+
     per_page = 30  # Display 30 players per page
     offset = (page - 1) * per_page
     
-    # Fetch the total number of players, including search filtering
-    search_filter = f"%{search_query}%"  # Use SQL LIKE pattern for partial matching
-    total_players_query = text("""
-        SELECT COUNT(*) FROM players
-        JOIN teams ON players.team_id = teams.team_id
-        WHERE players.player_name ILIKE :search_filter OR teams.team_name ILIKE :search_filter
-    """)
-    with db.engine.connect() as connection:
-        total_players = connection.execute(total_players_query, {"search_filter": search_filter}).scalar()
+    # Base SQL query for filtering
+    filters = ["(players.player_name ILIKE :search_filter OR teams.team_name ILIKE :search_filter)"]
+    query_params = {"search_filter": f"%{search_query}%"}
 
-    # Fetch the players for the current page, including search filtering
-    query = text("""
+    # Apply caps filter if it is provided
+    if caps is not None:
+        filters.append("players.caps >= :caps")
+        query_params["caps"] = caps
+
+    # Apply birth year filter if it is provided
+    if birth_year:
+        filters.append("EXTRACT(YEAR FROM players.date_of_birth) = :birth_year")
+        query_params["birth_year"] = birth_year
+
+    # Apply country filter if selected countries are provided
+    if countries:
+        filters.append("teams.team_name IN :countries")
+        query_params["countries"] = tuple(countries)  # Pass as a tuple for SQL IN clause
+
+    # Combine the filters into the query
+    filters_query = " AND ".join(filters)
+
+    # Query to get the list of distinct countries (team names)
+    countries_query = text("""
+        SELECT DISTINCT teams.team_name
+        FROM teams
+        ORDER BY teams.team_name
+    """)
+
+    # Query to get the total number of players based on filters
+    total_players_query = text(f"""
+        SELECT COUNT(*)
+        FROM players
+        JOIN teams ON players.team_id = teams.team_id
+        WHERE {filters_query}
+    """)
+
+    # Query to get the players based on filters
+    query = text(f"""
         SELECT players.player_id, players.player_name, teams.team_name, players.position, players.date_of_birth, players.caps
         FROM players
         JOIN teams ON players.team_id = teams.team_id
-        WHERE players.player_name ILIKE :search_filter OR teams.team_name ILIKE :search_filter
+        WHERE {filters_query}
         LIMIT :per_page OFFSET :offset
     """)
     
     with db.engine.connect() as connection:
-        result = connection.execute(query, {"per_page": per_page, "offset": offset, "search_filter": search_filter})
+        # Fetch the list of distinct countries (team names)
+        countries_list = connection.execute(countries_query).mappings().fetchall()
+        countries = [{'team_name': row["team_name"]} for row in countries_list]  # Format countries
+
+        total_players = connection.execute(total_players_query, query_params).scalar()
+
+        result = connection.execute(query, {**query_params, "per_page": per_page, "offset": offset})
 
         players = []
         for row in result.mappings():
@@ -228,7 +265,7 @@ def players(page):
                 "date_of_birth": row["date_of_birth"],
                 "caps": row["caps"]
             })
-    
+        
     # Calculate total pages
     total_pages = ceil(total_players / per_page)
 
@@ -237,7 +274,9 @@ def players(page):
     start_page = max(1, page - visible_pages // 2)
     end_page = min(total_pages, page + visible_pages // 2)
 
-    return render_template("players.html", players=players, page=page, total_pages=total_pages, start_page=start_page, end_page=end_page, search_query=search_query)
+    return render_template("players.html", players=players, page=page, total_pages=total_pages, start_page=start_page, end_page=end_page, caps=caps,
+        birth_year=birth_year,
+        selected_countries=countries, countries=countries)
 
 
 
