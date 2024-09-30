@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}Players{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<!-- Your existing content here -->
+<div class="container">
+    <h3 class="mt-4 mb-4">Players</h3>
+
+    <!-- Search bar -->
+    <div class="mb-4">
+        <form method="GET" action="{{ url_for('players') }}">
+            <div class="input-group">
+                <input type="text" name="q" class="form-control" placeholder="Search by name or country" value="{{ search_query }}">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+
+    <!-- Player cards and modals -->
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4">
+        {% for player in players %}
+        <div class="col mb-4">
+            <div class="card h-100" data-bs-toggle="modal" data-bs-target="#playerModal{{ player.player_id }}" style="cursor: pointer;">
+                <div class="card-body">
+                    <h6 class="card-title">{{ player.player_name }}</h6>
+                    <p class="card-text">
+                        Country: {{ player.team_name }}<br>
+                        Position: {{ player.position }}<br>
+                        Date of Birth: {{ player.date_of_birth }}<br>
+                        Caps: {{ player.caps }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal for each player -->
+        <div class="modal fade" id="playerModal{{ player.player_id }}" tabindex="-1" aria-labelledby="playerModalLabel{{ player.player_id }}" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="playerModalLabel{{ player.player_id }}">{{ player.player_name }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Country:</strong> {{ player.team_name }}</p>
+                                <p><strong>Date of Birth:</strong> {{ player.date_of_birth }}</p>
+                                <p><strong>Position:</strong> {{ player.position }}</p>
+                                <p><strong>Caps:</strong> {{ player.caps }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <canvas id="goalsChart{{ player.player_id }}"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    
+    
+    <!-- Pagination -->
+    <nav aria-label="Page navigation" class="mt-5">
+        <ul class="pagination justify-content-center pagination-container">
+            {% if page > 1 %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('players', page=1) }}">First</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('players', page=page-1) }}">Previous</a>
+            </li>
+            {% endif %}
+
+            {% if start_page > 1 %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('players', page=1) }}">1</a>
+            </li>
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+
+            {% for i in range(start_page, end_page + 1) %}
+            <li class="page-item {% if page == i %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('players', page=i) }}">{{ i }}</a>
+            </li>
+            {% endfor %}
+
+            {% if end_page < total_pages %}
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('players', page=total_pages) }}">{{ total_pages }}</a>
+            </li>
+            {% endif %}
+
+            {% if page < total_pages %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('players', page=page+1) }}">Next</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('players', page=total_pages) }}">Last</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+
+
+    
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function initChart(modalElement) {
+        var chartId = modalElement.getAttribute('id').replace('playerModal', 'goalsChart');
+        var ctx = document.getElementById(chartId).getContext('2d');
+        var chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['2018', '2019', '2020', '2021', '2022'],
+                datasets: [{
+                    label: 'Goals Scored',
+                    data: [12, 19, 3, 5, 2],  // Example data, replace with actual player data
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var modals = document.querySelectorAll('.modal');
+        modals.forEach(function(modal) {
+            modal.addEventListener('shown.bs.modal', function() {
+                initChart(this);
+            });
+        });
+    });
+</script>
+{% endblock %}
+
+
+<style>
+    /* Ensure pagination buttons stay within the screen */
+    .pagination-container {
+        display: block;
+        max-width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .pagination {
+        display: inline-flex;
+        flex-wrap: nowrap;
+        justify-content: center;
+        margin-bottom: 0;
+        padding: 0;
+    }
+
+    .pagination li {
+        display: inline-block;
+        margin: 0 2px;
+    }
+
+    .pagination a {
+        white-space: nowrap;
+        padding: 5px 10px;
+    }
+
+    /* Prevent pagination from looking squeezed on smaller screens */
+    @media (max-width: 768px) {
+        .pagination-container {
+            max-width: 100%;
+        }
+
+        .pagination {
+            justify-content: flex-start;
+        }
+    }
+</style>
+
+

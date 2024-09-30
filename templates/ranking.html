@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}World Ranking{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-left mb-4">World Ranking</h2>
+
+    <!-- Search bar -->
+    <div class="mb-4">
+        <form method="GET" action="{{ url_for('ranking') }}">
+            <div class="input-group">
+                <input type="text" class="form-control" name="q" placeholder="Search by team name" value="{{ search_query }}">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Ranking Table -->
+    <table class="table table-hover mt-4">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Team</th>
+                <th>Matches Won</th>
+                <th>World Cup Wins</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for team in teams %}
+            <tr>
+                <td>{{ loop.index + (page - 1) * per_page }}</td> <!-- Adjust rank for pagination -->
+                <td>{{ team.team_name }}</td>
+                <td>{{ team.matches_won }}</td>
+                <td>{{ team.world_cup_wins }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <nav aria-label="Page navigation" class="mt-5">
+        <ul class="pagination justify-content-center">
+            {% if page > 1 %}
+            <li class="page-item"><a class="page-link" href="{{ url_for('ranking', page=1) }}">First</a></li>
+            <li class="page-item"><a class="page-link" href="{{ url_for('ranking', page=page-1) }}">Previous</a></li>
+            {% endif %}
+
+            {% for i in range(start_page, end_page + 1) %}
+            <li class="page-item {% if page == i %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('ranking', page=i) }}">{{ i }}</a>
+            </li>
+            {% endfor %}
+
+            {% if page < total_pages %}
+            <li class="page-item"><a class="page-link" href="{{ url_for('ranking', page=page+1) }}">Next</a></li>
+            <li class="page-item"><a class="page-link" href="{{ url_for('ranking', page=total_pages) }}">Last</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+{% endblock %}

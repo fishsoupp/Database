@@ -1,0 +1,66 @@
+/* Sidebar styling */
+#sidebar {
+    background-color: #343a40;
+    height: 100vh;
+    min-width: 250px;
+    position: fixed;
+}
+
+#sidebar .list-group-item {
+    background-color: #343a40;
+    border: none;
+    padding: 15px 20px;
+    margin-bottom: 10px;
+}
+
+#sidebar .list-group-item a {
+    color: white;
+    text-decoration: none;
+}
+
+#sidebar .list-group-item a:hover {
+    color: #007bff;
+    text-decoration: none; 
+}
+
+/* Active link styling */
+#sidebar .list-group-item .active {
+    color: #007bff; 
+    font-weight: bold;
+}
+
+/* Page Content Wrapper */
+#page-content-wrapper {
+    margin-left: 250px;
+    width: calc(100% - 250px);
+}
+
+.navbar {
+    background-color: #f8f9fa;
+}
+
+.dropdown-menu {
+    text-align: center;
+}
+
+.dropdown-menu-end {
+    right: 0;
+    left: auto;
+    margin-top: 10px;
+}
+
+.navbar-nav .nav-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card {
+    border: none;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+#topScorerGraph, #nextMatchGraph {
+    width: 300px !important;
+    height: 300px !important; 
+}
