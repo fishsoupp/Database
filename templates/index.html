@@ -73,40 +73,44 @@
             </div>
         </form>
 
-        <!-- Ensure only the number of teams in teams_data generates canvas elements -->
-        <div class="radar-container row">
-            {% for team in teams_data %}
-            <div class="col-lg-2 col-md-4 col-sm-6 mb-4 chart-wrapper">
-                <h5 class="text-center">{{ team.team_name }}</h5>
-                <canvas id="radarChart-{{ loop.index }}" width="200" height="200"></canvas> <!-- Reduced size -->
-            </div>
-            {% endfor %}
+        <div id="teams-display" class="radar-container row">
+            <!-- JavaScript will dynamically insert the team data and charts here -->
         </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        const teams = JSON.parse('{{ teams_data | safe }}'); // Parse the teams data passed from backend
-        const labels = ['Offensive', 'Defensive', 'Aggressiveness', 'Win Rate']; // Labels for the radar charts
-
-        // Check if we have teams to display
-        if (teams && teams.length > 0) {
-            teams.forEach((team, index) => {
-                // Only create charts for the number of teams present in the data
-                if (document.getElementById(`radarChart-${index + 1}`)) {
-
-                    // Data for each radar chart
-                    const data = {
-                        labels: labels,
+        
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const teams = JSON.parse('{{ teams_data | safe }}'); // Load team data
+            const teamsDisplay = document.getElementById('teams-display'); // Get the container for teams
+        
+            teams.forEach(team => {
+                // Create a container for each team's information and chart
+                const teamDiv = document.createElement('div');
+                teamDiv.classList.add('col-lg-2', 'col-md-4', 'col-sm-6', 'mb-4', 'chart-wrapper');
+        
+                // Assign an ID to each canvas based on team ID
+                const canvas = document.createElement('canvas');
+                canvas.id = `radarChart-${team.team_id}`;
+                canvas.width = 200;
+                canvas.height = 200;
+        
+                teamDiv.appendChild(canvas); 
+                teamsDisplay.appendChild(teamDiv);
+        
+                // Initialize Chart.js on the newly created canvas
+                const ctx = canvas.getContext('2d');
+                new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['Offensive', 'Defensive', 'Aggressiveness', 'Win Rate'],
                         datasets: [{
-                            label: team.team_name, // This will show up in the legend
+                            label: team.team_name,
                             data: [
                                 team.avg_goals_scored,
                                 team.avg_goals_conceded,
                                 team.avg_cards,
                                 team.win_rate
                             ],
-                            fill: true,
                             backgroundColor: 'rgba(54, 162, 235, 0.2)',
                             borderColor: 'rgb(54, 162, 235)',
                             pointBackgroundColor: 'rgb(54, 162, 235)',
@@ -114,61 +118,31 @@
                             pointHoverBackgroundColor: '#fff',
                             pointHoverBorderColor: 'rgb(54, 162, 235)'
                         }]
-                    };
-
-                    // Configuration for each radar chart
-                    const config = {
-                        type: 'radar',
-                        data: data,
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: true, // Allow charts to resize properly
-                            scales: {
-                                r: {
-                                    ticks: {
-                                        display: false // Hide the numerical values around the chart
-                                    },
-                                    grid: {
-                                        display: true // Keep the grid lines visible
-                                    },
-                                    angleLines: {
-                                        display: true // Keep the angle lines visible
-                                    },
-                                    pointLabels: {
-                                        display: true // Show the labels for each axis
-                                    }
-                                }
-                            },
-                            plugins: {
-                                legend: {
-                                    display: true,
-                                    position: 'top',
-                                    labels: {
-                                        color: 'black',
-                                        font: {
-                                            size: 15 // Adjust font size for the legend
-                                        }
-                                    }
-                                }
-                            },
-                            elements: {
-                                line: {
-                                    borderWidth: 2 // Thinner border for the chart lines
-                                }
+                    },
+                    options: {
+                        scales: {
+                            r: {
+                                angleLines: { display: true },
+                                ticks: { display: false },
+                                grid: { display: true },
+                                pointLabels: { display: true }
                             }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            }
+                        },
+                        elements: {
+                            line: { borderWidth: 2 }
                         }
-                    };
-
-                    // Generate radar chart for the current team
-                    const radarChartId = `radarChart-${index + 1}`;
-                    const radarChart = new Chart(
-                        document.getElementById(radarChartId),
-                        config
-                    );
-                }
+                    }
+                });
             });
-        }
-    </script>
+        });
+        </script>
+    </div>
 
     {% set page = page or 1 %}
 

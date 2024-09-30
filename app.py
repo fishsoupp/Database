@@ -133,16 +133,16 @@ def home():
             "radar_offset": radar_offset
         }).fetchall()
 
-    # Properly format the team_stats data into dictionaries for JSON conversion
-    teams_data = []
-    for team in team_stats:
-        teams_data.append({
-            "team_name": team.team_name,
-            "avg_goals_scored": float(team.avg_goals_scored),
-            "avg_goals_conceded": float(team.avg_goals_conceded),
-            "avg_cards": float(team.avg_cards),
-            "win_rate": float(team.win_rate)
-        })
+        # Properly format the team_stats data into dictionaries for JSON conversion
+        teams_data = []
+        for team in team_stats:
+            teams_data.append({
+                "team_name": team.team_name,
+                "avg_goals_scored": float(team.avg_goals_scored) if team.avg_goals_scored is not None else 0,
+                "avg_goals_conceded": float(team.avg_goals_conceded) if team.avg_goals_conceded is not None else 0,
+                "avg_cards": float(team.avg_cards) if team.avg_cards is not None else 0,
+                "win_rate": float(team.win_rate) if team.win_rate is not None else 0
+            })
 
     # Total number of teams for pagination (for radar charts)
     query_total_teams = text("SELECT COUNT(*) FROM teams WHERE team_name ILIKE :search_filter")
