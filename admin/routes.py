@@ -342,8 +342,70 @@ def add_match():
     return redirect(url_for('adminRoutes.matches_management'))
 
 
+@adminRoutes.route('/matches/update/<int:match_id>', methods=['POST'])
+def update_match(match_id):
+    if request.method == 'POST':
+        # Get form data
+        tournament_id = request.form.get('tournament', type=int)
+        home_team_id = request.form.get('homeTeam', type=int)
+        away_team_id = request.form.get('awayTeam', type=int)
+        stadium_id = request.form.get('stadium', type=int)
+        home_team_goals = request.form.get('home_team_goals', type=int)
+        away_team_goals = request.form.get('away_team_goals', type=int)
+        round = request.form.get('round')
+        referee_id = request.form.get('referee', type=int)
+
+        # Construct the raw SQL query to update the match
+        sql = text("""
+            UPDATE matches
+            SET tournament_id = :tournament_id,
+                home_team_id = :home_team_id,
+                away_team_id = :away_team_id,
+                stadium_id = :stadium_id,
+                home_team_goals = :home_team_goals,
+                away_team_goals = :away_team_goals,
+                round = :round,
+                referee_id = :referee_id
+            WHERE match_id = :match_id
+        """)
+
+        try:
+            with db.engine.connect() as conn:
+                conn.execute(sql, {
+                    'tournament_id': tournament_id,
+                    'home_team_id': home_team_id,
+                    'away_team_id': away_team_id,
+                    'stadium_id': stadium_id,
+                    'home_team_goals': home_team_goals,
+                    'away_team_goals': away_team_goals,
+                    'round': round,
+                    'referee_id': referee_id,
+                    'match_id': match_id
+                })
+                conn.commit()  # Commit the transaction
+                flash(f"Match {match_id} updated successfully!", 'success')
+        except Exception as e:
+            current_app.logger.error(f"Error updating match: {str(e)}", exc_info=True)
+            flash(f"Error updating match: {str(e)}", 'danger')
+
+    return redirect(url_for('adminRoutes.matches_management'))
 
 
+@adminRoutes.route('/matches/delete/<int:match_id>', methods=['POST'])
+def delete_match(match_id):
+    # SQL to delete the match
+    sql = text("DELETE FROM matches WHERE match_id = :match_id")
+    
+    try:
+        with db.engine.connect() as conn:
+            conn.execute(sql, {'match_id': match_id})
+            conn.commit()  # Commit the transaction
+            flash(f"Match with ID {match_id} deleted successfully!", 'success')
+    except Exception as e:
+        current_app.logger.error(f"Error deleting match: {str(e)}", exc_info=True)
+        flash(f"Error deleting match: {str(e)}", 'danger')
+    
+    return redirect(url_for('adminRoutes.matches_management'))
 
 
 

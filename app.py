@@ -1,5 +1,6 @@
 from flask import Flask, redirect, url_for, render_template
 from flask_sqlalchemy import SQLAlchemy
+from flask_wtf.csrf import CSRFProtect
 from sqlalchemy.sql import text
 
 from os import getenv

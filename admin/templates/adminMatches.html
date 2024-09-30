@@ -33,8 +33,8 @@
       <td>{{ match.round }}</td>
       <td>{{ match.referee_name }}</td>
       <td>
-        <!-- <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editMatchModal-{{ match.match_id }}">Edit</button>
-        <button class="btn btn-sm btn-danger">Delete</button> -->
+        <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editMatchModal-{{ match.match_id }}">Edit</button>
+        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteMatchModal-{{ match.match_id }}">Delete</button>
       </td>
     </tr>
     {% endfor %}
@@ -158,5 +158,102 @@
     </div>
   </div>
 </div>
+
+
+{% for match in matches %}
+  <!-- Edit Match Modal -->
+  <div class="modal fade" id="editMatchModal-{{ match.match_id }}" tabindex="-1" aria-labelledby="editMatchLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editMatchLabel">Edit Match</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form action="{{ url_for('adminRoutes.update_match', match_id=match.match_id) }}" method="post">
+            <div class="mb-3">
+              <label for="tournamentEdit-{{ match.match_id }}" class="form-label">Tournament</label>
+              <select class="form-control" id="tournamentEdit-{{ match.match_id }}" name="tournament">
+                {% for tournament in tournaments %}
+                <option value="{{ tournament.tournament_id }}" {% if match.tournament_id == tournament.tournament_id %}selected{% endif %}>{{ tournament.tournament_year }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="homeTeamEdit-{{ match.match_id }}" class="form-label">Home Team</label>
+              <select class="form-control" id="homeTeamEdit-{{ match.match_id }}" name="homeTeam">
+                {% for team in teams %}
+                <option value="{{ team.team_id }}" {% if match.home_team_id == team.team_id %}selected{% endif %}>{{ team.team_name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="awayTeamEdit-{{ match.match_id }}" class="form-label">Away Team</label>
+              <select class="form-control" id="awayTeamEdit-{{ match.match_id }}" name="awayTeam">
+                {% for team in teams %}
+                <option value="{{ team.team_id }}" {% if match.away_team_id == team.team_id %}selected{% endif %}>{{ team.team_name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="stadiumEdit-{{ match.match_id }}" class="form-label">Stadium</label>
+              <select class="form-control" id="stadiumEdit-{{ match.match_id }}" name="stadium">
+                {% for stadium in stadiums %}
+                <option value="{{ stadium.stadium_id }}" {% if match.stadium_id == stadium.stadium_id %}selected{% endif %}>{{ stadium.stadium_name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="home_team_goals-{{ match.match_id }}" class="form-label">Home Team Goals</label>
+              <input type="number" class="form-control" id="home_team_goals-{{ match.match_id }}" name="home_team_goals" value="{{ match.home_team_goals }}" required>
+            </div>
+            <div class="mb-3">
+              <label for="away_team_goals-{{ match.match_id }}" class="form-label">Away Team Goals</label>
+              <input type="number" class="form-control" id="away_team_goals-{{ match.match_id }}" name="away_team_goals" value="{{ match.away_team_goals }}" required>
+            </div>
+            <div class="mb-3">
+              <label for="round-{{ match.match_id }}" class="form-label">Round</label>
+              <input type="text" class="form-control" id="round-{{ match.match_id }}" name="round" value="{{ match.round }}" required>
+            </div>
+            <div class="mb-3">
+              <label for="referee-{{ match.match_id }}" class="form-label">Referee</label>
+              <select class="form-control" id="referee-{{ match.match_id }}" name="referee">
+                {% for referee in referees %}
+                <option value="{{ referee.referee_id }}" {% if match.referee_id == referee.referee_id %}selected{% endif %}>{{ referee.referee_name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal fade" id="deleteMatchModal-{{ match.match_id }}" tabindex="-1" aria-labelledby="deleteMatchLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteMatchLabel">Confirm Deletion</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to delete this match?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <form action="{{ url_for('adminRoutes.delete_match', match_id=match.match_id) }}" method="POST">
+            <button type="submit" class="btn btn-danger">Delete</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+{% endfor %}
+
 
 {% endblock %}
