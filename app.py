@@ -3,7 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
 from sqlalchemy.sql import text
 from math import ceil
-
+import json
+from decimal import Decimal
 
 
 from os import getenv
@@ -13,6 +14,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
+
+
 
 
 #Configuration for PostgreSQL database
@@ -27,10 +30,262 @@ db = SQLAlchemy(app)
 from admin.routes import adminRoutes
 app.register_blueprint(adminRoutes, url_prefix="/admin")
 
+def decimal_default(obj):
+    """Convert Decimal objects to floats."""
+    if isinstance(obj, Decimal):
+        return float(obj)
+    raise TypeError
 
 @app.route('/')
 def home():
-    return render_template("index.html")
+    # Get the current page number from the query parameters, defaulting to 1
+    page = request.args.get('page', 1, type=int)
+    
+    # Get the search query from the user input
+    search_query = request.args.get('q', '')  # Get the search term from the query parameters
+
+    # Set the number of items to display per page for paginated sections
+    per_page = 10  # Show 5 items per page for most sections
+    radar_chart_per_page = 21  # Show 18 teams at once for radar charts
+    
+    # Calculate the offset for the SQL query based on the current page number
+    offset = (page - 1) * per_page
+    radar_offset = (page - 1) * radar_chart_per_page
+
+    # Search filter to match the teams based on user input
+    search_filter = f"%{search_query}%"  # Search term for filtering teams
+
+    # Query for Most FIFA World Cup Wins (Paginated)
+    query_wc_wins = text("""
+        SELECT teams.team_name, COUNT(tournaments.tournament_id) AS world_cup_wins
+        FROM teams
+        JOIN tournaments ON tournaments.winner_team_id = teams.team_id
+        GROUP BY teams.team_name
+        ORDER BY world_cup_wins DESC
+        LIMIT :per_page OFFSET :offset
+    """)
+
+    # Query for Most Goals Scored by a Specific Player (Paginated)
+    query_most_goals = text("""
+        SELECT players.player_name, SUM(player_performance.goals_scored) AS total_goals
+        FROM players
+        JOIN player_performance ON players.player_id = player_performance.player_id
+        GROUP BY players.player_name
+        ORDER BY total_goals DESC
+        LIMIT :per_page OFFSET :offset
+    """)
+
+    # Query for Recent Match Results (Paginated)
+    query_recent_matches = text("""
+        SELECT home_team.team_name AS home_team, away_team.team_name AS away_team,
+               matches.home_team_goals, matches.away_team_goals, matches.match_id
+        FROM matches
+        JOIN teams AS home_team ON matches.home_team_id = home_team.team_id
+        JOIN teams AS away_team ON matches.away_team_id = away_team.team_id
+        ORDER BY matches.match_id DESC
+        LIMIT :per_page OFFSET :offset
+    """)
+
+    # Query for Most Red/Yellow Cards (Paginated)
+    query_most_cards = text("""
+        SELECT players.player_name, SUM(player_performance.yellow_cards) AS total_yellow, SUM(player_performance.red_cards) AS total_red
+        FROM players
+        JOIN player_performance ON players.player_id = player_performance.player_id
+        GROUP BY players.player_name
+        ORDER BY total_yellow DESC, total_red DESC
+        LIMIT :per_page OFFSET :offset
+    """)
+
+    # Radar chart data: Fetch teams and their stats for radar chart display (Limited to 18 per page)
+    query_team_stats = text("""
+        SELECT teams.team_name, 
+            AVG(CASE 
+                WHEN matches.home_team_id = teams.team_id THEN player_performance.goals_scored
+                WHEN matches.away_team_id = teams.team_id THEN player_performance.goals_scored
+            END) AS avg_goals_scored, 
+            AVG(CASE 
+                WHEN matches.home_team_id = teams.team_id THEN matches.away_team_goals
+                WHEN matches.away_team_id = teams.team_id THEN matches.home_team_goals
+            END) AS avg_goals_conceded, 
+            AVG(player_performance.yellow_cards + player_performance.red_cards) AS avg_cards,
+            AVG(CASE 
+                WHEN matches.home_team_id = teams.team_id AND matches.home_team_goals > matches.away_team_goals THEN 1
+                WHEN matches.away_team_id = teams.team_id AND matches.away_team_goals > matches.home_team_goals THEN 1
+                ELSE 0 
+            END) AS win_rate
+        FROM teams
+        JOIN matches ON teams.team_id = matches.home_team_id OR teams.team_id = matches.away_team_id
+        JOIN player_performance ON matches.match_id = player_performance.match_id
+        WHERE teams.team_name ILIKE :search_filter
+        GROUP BY teams.team_name
+        LIMIT :radar_chart_per_page OFFSET :radar_offset
+    """)
+
+    # Execute queries and fetch results
+    with db.engine.connect() as connection:
+        wc_wins = connection.execute(query_wc_wins, {"per_page": per_page, "offset": offset}).fetchall()
+        most_goals = connection.execute(query_most_goals, {"per_page": per_page, "offset": offset}).fetchall()
+        recent_matches = connection.execute(query_recent_matches, {"per_page": per_page, "offset": offset}).fetchall()
+        most_cards = connection.execute(query_most_cards, {"per_page": per_page, "offset": offset}).fetchall()
+        team_stats = connection.execute(query_team_stats, {
+            "search_filter": search_filter, 
+            "radar_chart_per_page": radar_chart_per_page,
+            "radar_offset": radar_offset
+        }).fetchall()
+
+    # Properly format the team_stats data into dictionaries for JSON conversion
+    teams_data = []
+    for team in team_stats:
+        teams_data.append({
+            "team_name": team.team_name,
+            "avg_goals_scored": float(team.avg_goals_scored),
+            "avg_goals_conceded": float(team.avg_goals_conceded),
+            "avg_cards": float(team.avg_cards),
+            "win_rate": float(team.win_rate)
+        })
+
+    # Total number of teams for pagination (for radar charts)
+    query_total_teams = text("SELECT COUNT(*) FROM teams WHERE team_name ILIKE :search_filter")
+    with db.engine.connect() as connection:
+        total_teams = connection.execute(query_total_teams, {"search_filter": search_filter}).scalar()
+
+    # Calculate total pages based on total teams for radar charts
+    total_radar_pages = (total_teams + radar_chart_per_page - 1) // radar_chart_per_page
+
+    # Render the template with the relevant data
+    return render_template(
+        'index.html',
+        wc_wins=wc_wins,
+        most_goals=most_goals,
+        recent_matches=recent_matches,
+        most_cards=most_cards,
+        teams_data=json.dumps(teams_data, default=decimal_default),  # Limited to 18 teams
+        page=page,
+        total_pages=total_radar_pages,  # Used for radar chart pagination
+        search_query=search_query
+    )
+
+
+
+
+
+
+
+
+
+
+
+@app.route('/teams_radar', defaults={'page': 1})
+@app.route('/teams_radar/page/<int:page>')
+def teams_radar(page):
+    search_query = request.args.get('q', '')  # Get search term from query parameters
+    per_page = 5  # Show 5 teams per page
+    offset = (page - 1) * per_page
+    search_filter = f"%{search_query}%"
+    
+    # Offensive Rating: Average goals scored per match
+    query_offensive = text("""
+        SELECT 
+            teams.team_name,
+            AVG(goals_scored) AS avg_goals_scored
+        FROM 
+            teams
+        JOIN matches ON teams.team_id = matches.home_team_id OR teams.team_id = matches.away_team_id
+        JOIN player_performance ON matches.match_id = player_performance.match_id
+        WHERE teams.team_name ILIKE :search_filter
+        GROUP BY teams.team_name
+        ORDER BY teams.team_name
+        LIMIT :per_page OFFSET :offset
+    """)
+    
+    # Defensive Rating: Average goals conceded per match
+    query_defensive = text("""
+        SELECT 
+            teams.team_name,
+            AVG(CASE 
+                WHEN teams.team_id = matches.home_team_id THEN matches.away_team_goals
+                ELSE matches.home_team_goals
+            END) AS avg_goals_conceded
+        FROM 
+            teams
+        JOIN matches ON teams.team_id = matches.home_team_id OR teams.team_id = matches.away_team_id
+        WHERE teams.team_name ILIKE :search_filter
+        GROUP BY teams.team_name
+        ORDER BY teams.team_name
+        LIMIT :per_page OFFSET :offset
+    """)
+
+    # Aggressiveness: Average yellow and red cards per match
+    query_aggressiveness = text("""
+        SELECT 
+            teams.team_name,
+            AVG(player_performance.yellow_cards + player_performance.red_cards) AS avg_cards
+        FROM 
+            teams
+        JOIN matches ON teams.team_id = matches.home_team_id OR teams.team_id = matches.away_team_id
+        JOIN player_performance ON matches.match_id = player_performance.match_id
+        WHERE teams.team_name ILIKE :search_filter
+        GROUP BY teams.team_name
+        ORDER BY teams.team_name
+        LIMIT :per_page OFFSET :offset
+    """)
+
+    # Win Rate: Wins per match
+    query_win_rate = text("""
+        SELECT 
+            teams.team_name,
+            (SUM(CASE
+                WHEN matches.home_team_id = teams.team_id AND matches.home_team_goals > matches.away_team_goals THEN 1
+                WHEN matches.away_team_id = teams.team_id AND matches.away_team_goals > matches.home_team_goals THEN 1
+                ELSE 0
+            END) * 1.0 / COUNT(matches.match_id)) AS win_rate
+        FROM 
+            teams
+        JOIN matches ON teams.team_id = matches.home_team_id OR teams.team_id = matches.away_team_id
+        WHERE teams.team_name ILIKE :search_filter
+        GROUP BY teams.team_name
+        ORDER BY teams.team_name
+        LIMIT :per_page OFFSET :offset
+    """)
+
+    with db.engine.connect() as connection:
+        offensive_data = connection.execute(query_offensive, {"per_page": per_page, "offset": offset, "search_filter": search_filter}).fetchall()
+        defensive_data = connection.execute(query_defensive, {"per_page": per_page, "offset": offset, "search_filter": search_filter}).fetchall()
+        aggressiveness_data = connection.execute(query_aggressiveness, {"per_page": per_page, "offset": offset, "search_filter": search_filter}).fetchall()
+        win_rate_data = connection.execute(query_win_rate, {"per_page": per_page, "offset": offset, "search_filter": search_filter}).fetchall()
+    
+    # Combine all data for radar chart rendering
+    teams_data = []
+    for i in range(len(offensive_data)):
+        team = {
+            "team_name": offensive_data[i]["team_name"],
+            "avg_goals_scored": offensive_data[i]["avg_goals_scored"],
+            "avg_goals_conceded": defensive_data[i]["avg_goals_conceded"],
+            "avg_cards": aggressiveness_data[i]["avg_cards"],
+            "win_rate": win_rate_data[i]["win_rate"]
+        }
+        teams_data.append(team)
+
+    # Query for pagination total number of teams
+    query_total_teams = text("""
+        SELECT COUNT(*) FROM teams WHERE team_name ILIKE :search_filter
+    """)
+
+    with db.engine.connect() as connection:
+        total_teams = connection.execute(query_total_teams, {"search_filter": search_filter}).scalar()
+
+    total_pages = (total_teams + per_page - 1) // per_page  # Calculate total pages
+
+    return render_template(
+        'index.html',
+        teams_data=teams_data,  # Teams' radar chart data
+        page=page,
+        per_page=per_page,  # Pass per_page to template
+        total_pages=total_pages,
+        search_query=search_query
+    )
+
+
 
 @app.route('/index')
 def index():

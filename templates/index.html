@@ -3,55 +3,221 @@
 {% block title %}Homepage{% endblock %}
 
 {% block content %}
-<!-- Main Section -->
 <div class="container mt-5">
-    <!-- Section for Heading and Description -->
+    <!-- Section for Most FIFA World Cup Wins -->
     <div class="row">
         <div class="col-lg-6">
-            <h2>World's best on show in FIFA's tournaments</h2>
-            <p>
-                As well as showcasing the very best the beautiful game has to offer, FIFA’s tournaments drive the sport’s development.
-                The FIFA World Cup™ and FIFA Women’s World Cup™ offer a shot at global glory to the game’s top nations, while elite clubs come together to contest the FIFA Club World Cup.
-                The FIFA U-17 and U-20 World Cups and their female equivalents have a well-earned reputation for helping develop superstars-in-the-making, while the FIFA Futsal World Cup™ and FIFA Beach Soccer World Cup™ provide a platform for the crème de la crème of these thrilling disciplines.
-            </p>
+            <h4>Most FIFA World Cup Wins</h4>
+            <ul>
+                {% for team in wc_wins %}
+                <li>{{ team.team_name }} - {{ team.world_cup_wins }} wins</li>
+                {% endfor %}
+            </ul>
         </div>
-        <!-- Section for Image -->
+
+        <!-- Section for Top Scorers -->
         <div class="col-lg-6">
-            <img src="/images/images.jpeg" class="img-fluid" alt="FIFA Players">
+            <h4>Top Scorers</h4>
+            <ul>
+                {% for player in most_goals %}
+                <li>{{ player.player_name }} - {{ player.total_goals }} goals</li>
+                {% endfor %}
+            </ul>
         </div>
     </div>
 
+    <!-- Section for Recent Match Results -->
     <div class="mt-5">
-        <h4>Upcoming Tournaments & Events</h4>
-        
-        <!-- Horizontal scroll container for the tournaments -->
-        <div class="d-flex justify-content-center flex-wrap">
-            <!-- First Tournament -->
-            <div class="card m-3" style="width: 18rem;">
-                <img src="/images/tournament1.jpg" class="card-img-top" alt="Tournament 1">
-                <div class="card-body">
-                    <p class="card-text">FIFA U-17 Women's World Cup Dominican Republic 2024™</p>
+        <h4>Recent Match Results</h4>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Home Team</th>
+                    <th>Away Team</th>
+                    <th>Home Goals</th>
+                    <th>Away Goals</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for match in recent_matches %}
+                <tr>
+                    <td>{{ match.home_team }}</td>
+                    <td>{{ match.away_team }}</td>
+                    <td>{{ match.home_team_goals }}</td>
+                    <td>{{ match.away_team_goals }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Section for Most Red/Yellow Cards -->
+    <div class="mt-5">
+        <h4>Players with Most Yellow and Red Cards</h4>
+        <ul>
+            {% for player in most_cards %}
+            <li>{{ player.player_name }} - Yellow Cards: {{ player.total_yellow }}, Red Cards: {{ player.total_red }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Radar Charts Section for All Teams -->
+    <div class="mt-5">
+        <h4>Team Performance Radar Charts</h4>
+        <form method="GET" action="{{ url_for('home') }}">
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" name="q" placeholder="Search team..." value="{{ search_query }}">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="submit">Search</button>
                 </div>
             </div>
-            
-            <!-- Second Tournament -->
-            <div class="card m-3" style="width: 18rem;">
-                <img src="/images/tournament2.jpg" class="card-img-top" alt="Tournament 2">
-                <div class="card-body">
-                    <p class="card-text">FIFA Beach Soccer World Cup Seychelles 2025™</p>
-                </div>
+        </form>
+
+        <!-- Ensure only the number of teams in teams_data generates canvas elements -->
+        <div class="radar-container row">
+            {% for team in teams_data %}
+            <div class="col-lg-2 col-md-4 col-sm-6 mb-4 chart-wrapper">
+                <h5 class="text-center">{{ team.team_name }}</h5>
+                <canvas id="radarChart-{{ loop.index }}" width="200" height="200"></canvas> <!-- Reduced size -->
             </div>
-            
-            <!-- Third Tournament -->
-            <div class="card m-3" style="width: 18rem;">
-                <img src="/images/tournament3.jpg" class="card-img-top" alt="Tournament 3">
-                <div class="card-body">
-                    <p class="card-text">FIFA Club World Cup 2025™</p>
-                </div>
-            </div>
-            
-            <!-- Additional cards can go here -->
+            {% endfor %}
         </div>
     </div>
-</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const teams = JSON.parse('{{ teams_data | safe }}'); // Parse the teams data passed from backend
+        const labels = ['Offensive', 'Defensive', 'Aggressiveness', 'Win Rate']; // Labels for the radar charts
+
+        // Check if we have teams to display
+        if (teams && teams.length > 0) {
+            teams.forEach((team, index) => {
+                // Only create charts for the number of teams present in the data
+                if (document.getElementById(`radarChart-${index + 1}`)) {
+
+                    // Data for each radar chart
+                    const data = {
+                        labels: labels,
+                        datasets: [{
+                            label: team.team_name, // This will show up in the legend
+                            data: [
+                                team.avg_goals_scored,
+                                team.avg_goals_conceded,
+                                team.avg_cards,
+                                team.win_rate
+                            ],
+                            fill: true,
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgb(54, 162, 235)',
+                            pointBackgroundColor: 'rgb(54, 162, 235)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgb(54, 162, 235)'
+                        }]
+                    };
+
+                    // Configuration for each radar chart
+                    const config = {
+                        type: 'radar',
+                        data: data,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true, // Allow charts to resize properly
+                            scales: {
+                                r: {
+                                    ticks: {
+                                        display: false // Hide the numerical values around the chart
+                                    },
+                                    grid: {
+                                        display: true // Keep the grid lines visible
+                                    },
+                                    angleLines: {
+                                        display: true // Keep the angle lines visible
+                                    },
+                                    pointLabels: {
+                                        display: true // Show the labels for each axis
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top',
+                                    labels: {
+                                        color: 'black',
+                                        font: {
+                                            size: 15 // Adjust font size for the legend
+                                        }
+                                    }
+                                }
+                            },
+                            elements: {
+                                line: {
+                                    borderWidth: 2 // Thinner border for the chart lines
+                                }
+                            }
+                        }
+                    };
+
+                    // Generate radar chart for the current team
+                    const radarChartId = `radarChart-${index + 1}`;
+                    const radarChart = new Chart(
+                        document.getElementById(radarChartId),
+                        config
+                    );
+                }
+            });
+        }
+    </script>
+
+    {% set page = page or 1 %}
+
+    <!-- Pagination Logic -->
+    <nav aria-label="Page navigation" class="mt-3">
+        <ul class="pagination justify-content-center">
+            {% if page > 1 %}
+                <li class="page-item"><a class="page-link" href="{{ url_for('home', page=1) }}">First</a></li>
+                <li class="page-item"><a class="page-link" href="{{ url_for('home', page=page-1) }}">Previous</a></li>
+            {% endif %}
+            
+            {% for p in range(1, total_pages + 1) %}
+                <li class="page-item {% if p == page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('home', page=p) }}">{{ p }}</a>
+                </li>
+            {% endfor %}
+            
+            {% if page < total_pages %}
+                <li class="page-item"><a class="page-link" href="{{ url_for('home', page=page+1) }}">Next</a></li>
+                <li class="page-item"><a class="page-link" href="{{ url_for('home', page=total_pages) }}">Last</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <!-- Additional CSS for layout -->
+    <style>
+        .radar-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            height: 550px;
+        
+        }
+        .chart-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 10px; /* Reduce the space below each chart wrapper */
+            width: 180px; /* Reduce the width of each chart wrapper to fit more charts */
+        }
+        h5 {
+            font-size: 14px; /* Slightly smaller font size for team names */
+            margin-bottom: 5px; /* Less spacing below the team name */
+        }
+        canvas {
+            max-width: 200px; /* Reduce the chart size */
+            height: auto !important;
+            max-height: 200px; /* Adjusts the size of the radar chart */
+        }
+    </style>
 {% endblock %}
