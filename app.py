@@ -1,7 +1,7 @@
 from flask import Flask, redirect, url_for, render_template, request
 from flask_sqlalchemy import SQLAlchemy
+from flask_wtf.csrf import CSRFProtect
 from sqlalchemy.sql import text
-from admin.routes import adminRoutes
 from math import ceil
 
 
@@ -13,14 +13,20 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-app.register_blueprint(adminRoutes, url_prefix="/admin")
+
 
 #Configuration for PostgreSQL database
 app.config['SQLALCHEMY_DATABASE_URI'] = getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = '\xb0\t\xce\x90\x1a\xb7\xfb\x1e\xdb\xb5\xdd\xc0'
 
 # Initialize the database
 db = SQLAlchemy(app)
+
+# Import routes
+from admin.routes import adminRoutes
+app.register_blueprint(adminRoutes, url_prefix="/admin")
+
 
 @app.route('/')
 def home():
