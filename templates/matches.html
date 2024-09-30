@@ -6,10 +6,23 @@
 <div class="container">
     <h3 class="mt-4 mb-4">Past FIFA World Cup Matches</h3>
 
+    <!-- Search bar -->
+    <div class="mb-4">
+        <form method="GET" action="{{ url_for('match') }}">
+            <div class="input-group">
+                <input type="text" class="form-control" name="q" placeholder="Search by team or venue" value="{{ search_query }}">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
     <table class="table table-striped">
         <thead>
             <tr>
-                <th scope="col">Date</th>
                 <th scope="col">Home Team</th>
                 <th scope="col">Away Team</th>
                 <th scope="col">Score</th>
@@ -18,80 +31,36 @@
             </tr>
         </thead>
         <tbody>
+            {% for match in matches %}
             <tr>
-                <td>18 Dec 2022</td>
-                <td>Argentina</td>
-                <td>France</td>
-                <td>3 - 3 (Argentina won 4-2 on penalties)</td>
-                <td>Final</td>
-                <td>Lusail Stadium</td>
+                <td>{{ match.home_team_name }}</td>
+                <td>{{ match.away_team_name }}</td>
+                <td>{{ match.home_team_goals }} - {{ match.away_team_goals }}</td> <!-- Display the score -->
+                <td>{{ match.round }}</td>
+                <td>{{ match.venue }}</td>
             </tr>
-            <tr>
-                <td>17 Dec 2022</td>
-                <td>Croatia</td>
-                <td>Morocco</td>
-                <td>2 - 1</td>
-                <td>Third Place Playoff</td>
-                <td>Khalifa International Stadium</td>
-            </tr>
-            <tr>
-                <td>14 Dec 2022</td>
-                <td>France</td>
-                <td>Morocco</td>
-                <td>2 - 0</td>
-                <td>Semi-Final</td>
-                <td>Al Bayt Stadium</td>
-            </tr>
-            <tr>
-                <td>13 Dec 2022</td>
-                <td>Argentina</td>
-                <td>Croatia</td>
-                <td>3 - 0</td>
-                <td>Semi-Final</td>
-                <td>Lusail Stadium</td>
-            </tr>
-            <tr>
-                <td>10 Dec 2022</td>
-                <td>Morocco</td>
-                <td>Portugal</td>
-                <td>1 - 0</td>
-                <td>Quarter-Final</td>
-                <td>Al Thumama Stadium</td>
-            </tr>
-            <tr>
-                <td>10 Dec 2022</td>
-                <td>England</td>
-                <td>France</td>
-                <td>1 - 2</td>
-                <td>Quarter-Final</td>
-                <td>Al Bayt Stadium</td>
-            </tr>
-            <tr>
-                <td>9 Dec 2022</td>
-                <td>Brazil</td>
-                <td>Croatia</td>
-                <td>1 - 1 (Croatia won 4-2 on penalties)</td>
-                <td>Quarter-Final</td>
-                <td>Education City Stadium</td>
-            </tr>
-            <tr>
-                <td>9 Dec 2022</td>
-                <td>Netherlands</td>
-                <td>Argentina</td>
-                <td>2 - 2 (Argentina won 4-3 on penalties)</td>
-                <td>Quarter-Final</td>
-                <td>Lusail Stadium</td>
-            </tr>
+            {% endfor %}
         </tbody>
     </table>
 
+    <!-- Pagination -->
     <nav aria-label="Page navigation" class="mt-5">
         <ul class="pagination justify-content-center">
-            <li class="page-item"><a class="page-link" href="#">Previous</a></li>
-            <li class="page-item"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
-            <li class="page-item"><a class="page-link" href="#">Next</a></li>
+            {% if page > 1 %}
+            <li class="page-item"><a class="page-link" href="{{ url_for('match', page=1) }}">First</a></li>
+            <li class="page-item"><a class="page-link" href="{{ url_for('match', page=page-1) }}">Previous</a></li>
+            {% endif %}
+
+            {% for i in range(start_page, end_page + 1) %}
+            <li class="page-item {% if page == i %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('match', page=i) }}">{{ i }}</a>
+            </li>
+            {% endfor %}
+
+            {% if page < total_pages %}
+            <li class="page-item"><a class="page-link" href="{{ url_for('match', page=page+1) }}">Next</a></li>
+            <li class="page-item"><a class="page-link" href="{{ url_for('match', page=total_pages) }}">Last</a></li>
+            {% endif %}
         </ul>
     </nav>
 </div>
