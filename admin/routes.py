@@ -78,7 +78,7 @@ def update_profile():
 
             conn.execute(sql, sql_params)
             conn.commit()
-       
+            session['admin_name'] = admin_name
             flash('Profile updated successfully!', 'success')
     except Exception as e:
         flash(f'Failed to update profile: {str(e)}', 'danger')
