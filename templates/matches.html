@@ -16,10 +16,61 @@
                         <i class="fas fa-search"></i>
                     </button>
                 </div>
+                <!-- Filter Button -->
+                <button type="button" class="btn btn-outline-secondary ms-2" data-bs-toggle="modal" data-bs-target="#filterModal">
+                    <i class="fas fa-filter"></i> Filters
+                </button>
             </div>
         </form>
     </div>
 
+    <!-- Filter Modal -->
+<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="filterModalLabel">Advanced Filters</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="filterForm">
+                    <!-- Dropdown for selecting INTERSECT team -->
+                    <div class="mb-3">
+                        <label for="intersectTeam" class="form-label">Select Team</label>
+                        <select class="form-control" id="intersectTeam" name="intersect_team">
+                            <option value="">Select a team...</option>
+                            {% for team in teams %}
+                            <option value="{{ team }}" {% if intersect_team == team %}selected{% endif %}>{{ team }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Dropdown for selecting EXCEPT team -->
+                    <div class="mb-3">
+                        <label for="exceptTeam" class="form-label">Exclude Matches Involving This Team</label>
+                        <select class="form-control" id="exceptTeam" name="except_team">
+                            <option value="">Select a team...</option>
+                            {% for team in teams %}
+                            <option value="{{ team }}" {% if except_team == team %}selected{% endif %}>{{ team }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Input for goals threshold -->
+                    <div class="mb-3">
+                        <label for="goalsThreshold" class="form-label">Minimum Goals Threshold</label>
+                        <input type="number" class="form-control" id="goalsThreshold" name="goals_threshold" value="{{ goals_threshold or '' }}" placeholder="Enter minimum goals threshold">
+                    </div>
+
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Display Matches -->
     <table class="table table-striped">
         <thead>
             <tr>
@@ -35,7 +86,7 @@
             <tr>
                 <td>{{ match.home_team_name }}</td>
                 <td>{{ match.away_team_name }}</td>
-                <td>{{ match.home_team_goals }} - {{ match.away_team_goals }}</td> <!-- Display the score -->
+                <td>{{ match.home_team_goals }} - {{ match.away_team_goals }}</td>
                 <td>{{ match.round }}</td>
                 <td>{{ match.venue }}</td>
             </tr>
