@@ -2,32 +2,128 @@ from flask import Blueprint, render_template, redirect, url_for, flash, session,
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import text
 from app import db  
+from app import bcrypt
 from .forms import LoginForm
 from datetime import date
+from werkzeug.security import check_password_hash, generate_password_hash
+from flask import session, flash, redirect, url_for
 
 adminRoutes = Blueprint("adminRoutes", __name__, template_folder="templates")
 
 
-# Admin Landing Page
 @adminRoutes.route("/landing")
 def adminLanding():
     if not session.get('admin_logged_in'):
         return redirect(url_for('adminRoutes.login'))  # Redirect if not logged in
-    return render_template("adminLanding.html")
+    
+    # Query to get total goals for teams in the most recent tournament
+    sql = text("""
+        SELECT 
+            t.team_name, 
+            COUNT(g.goal_id) AS total_goals
+        FROM 
+            goals g
+        JOIN matches m ON g.match_id = m.match_id
+        JOIN teams t ON (t.team_id = m.home_team_id OR t.team_id = m.away_team_id)
+        JOIN tournaments tr ON tr.tournament_id = m.tournament_id
+        WHERE 
+            tr.tournament_id = (
+                SELECT tournament_id 
+                FROM matches
+                GROUP BY tournament_id
+                ORDER BY COUNT(match_id) DESC
+                LIMIT 1
+            )
+        GROUP BY 
+            t.team_name;
+    """)
 
-# Admin Login Route
+    with db.engine.connect() as conn:
+        result = conn.execute(sql).fetchall()
+
+    # Convert the result into two lists: one for team names and one for their total goals
+    teams = [row[0] for row in result]
+    goals = [row[1] for row in result]
+
+    return render_template("adminLanding.html", teams=teams, goals=goals)
+
+
+@adminRoutes.route('/update_profile', methods=['POST'])
+def update_profile():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('adminRoutes.login'))  # Redirect if not logged in
+    
+    # Assuming `username`, `email`, and `phone` are provided in the form
+    admin_name = request.form.get('admin_name')
+    email = request.form.get('email')
+    admin_id = session.get('admin_id') 
+    
+    if not admin_id:
+        flash('Session expired. Please log in again.', 'danger')
+        return redirect(url_for('adminRoutes.login'))
+
+    try:
+        sql = text("""
+            UPDATE admin SET admin_name=:admin_name, email=:email WHERE admin_id=:admin_id
+        """)
+
+        # Dictionary for SQL parameters
+        sql_params = {
+            'admin_name': admin_name,
+            'email': email,
+            'admin_id': admin_id
+        }
+
+        with db.engine.connect() as conn:
+
+            conn.execute(sql, sql_params)
+            conn.commit()
+            session['admin_name'] = admin_name
+            flash('Profile updated successfully!', 'success')
+    except Exception as e:
+        flash(f'Failed to update profile: {str(e)}', 'danger')
+    
+    return redirect(url_for('adminRoutes.adminLanding'))
+
+
 @adminRoutes.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
+
     if form.validate_on_submit():
-        # Dummy authentication logic (replace with real DB check later)
-        if form.username.data == 'test' and form.password.data == 'test':
-            flash('Logged in successfully!', 'success')
-            session['admin_logged_in'] = True  # Store admin login status in session
-            return redirect(url_for('adminRoutes.adminLanding'))  # Redirect to landing 
-        else:
-            flash('Login failed. Please check your credentials.', 'danger')
-    return render_template("adminLogin.html", form=form, background_image=True)
+        sql = text("SELECT admin_id, admin_name, email, password FROM Admin WHERE email = :email")
+        try:
+            with db.engine.connect() as conn:
+                result = conn.execute(sql, {'email': form.email.data}).fetchone()
+
+            if result:
+                stored_id, stored_admin_name, stored_email, stored_password = result
+
+                if bcrypt.check_password_hash(stored_password, form.password.data):
+                    session['admin_logged_in'] = True
+                    session['admin_name'] = stored_admin_name  # Store admin name in session
+                    session['admin_id'] = stored_id
+
+                    print(f"session['admin_id']: {session['admin_id']}") 
+
+                    with db.engine.connect() as conn:
+                        conn.execute(text(f"SET myapp.admin_id = {stored_id};"))
+                        conn.commit()
+                    
+                    flash('Logged in successfully!', 'success')
+                    return redirect(url_for('adminRoutes.adminLanding'))
+                else:
+                    flash('Incorrect password. Please try again.', 'danger')
+            else:
+                flash('Email not found. Please check your email.', 'danger')
+
+        except Exception as e:
+            current_app.logger.error(f"Error during login: {str(e)}", exc_info=True)
+            flash('An error occurred during login. Please try again.', 'danger')
+
+    return render_template("adminLogin.html", form=form)
+
+
 
 # Admin Logout Route
 @adminRoutes.route("/logout")
