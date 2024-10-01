@@ -9,7 +9,7 @@
         <!-- Most FIFA World Cup Wins -->
         <div class="col-lg-4 mb-4">
             <div class="card">
-                <div class="card-header text-center" style="background-color: #738290">
+                <div class="card-header text-center" style="background-color: #dbecd4">
                     <h5 class="mb-0">Most FIFA World Cup Wins</h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -26,7 +26,7 @@
         <!-- Top Scorers -->
         <div class="col-lg-4 mb-4">
             <div class="card">
-                <div class="card-header text-center" style="background-color: #738290">
+                <div class="card-header text-center" style="background-color: #dbecd4">
                     <h5 class="mb-0">Top Scorers</h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -43,7 +43,7 @@
         <!-- Players with Most Yellow and Red Cards -->
         <div class="col-lg-4 mb-4">
             <div class="card">
-                <div class="card-header text-center" style="background-color: #738290;">
+                <div class="card-header text-center" style="background-color: #dbecd4;">
                     <h5 class="mb-0">Players with Most Yellow and Red Cards</h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -68,15 +68,15 @@
             <table class="table table-striped table-hover table-bordered">
                 <thead class="text-center">
                     <tr>
-                        <th style="background-color:#738290;">Home Team</th>
-                        <th style="background-color:#738290;">Away Team</th>
-                        <th style="background-color:#738290;">Home Goals</th>
-                        <th style="background-color:#738290;">Away Goals</th>
+                        <th style="background-color:#dbecd4;">Home Team</th>
+                        <th style="background-color:#dbecd4;">Away Team</th>
+                        <th style="background-color:#dbecd4;">Home Goals</th>
+                        <th style="background-color:#dbecd4;">Away Goals</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for match in recent_matches %}
-                    <tr class="text-center" >
+                    <tr class="text-center">
                         <td class="align-middle" style="background-color: #FFFCF7;">{{ match.home_team }}</td>
                         <td class="align-middle" style="background-color: #FFFCF7;">{{ match.away_team }}</td>
                         <td class="align-middle" style="background-color: #FFFCF7;">
@@ -111,8 +111,8 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const teams = JSON.parse('{{ teams_data | safe }}'); // Load team data
-            const teamsDisplay = document.getElementById('teams-display'); // Get the container for teams
+            const teams = JSON.parse('{{ teams_data | safe }}');
+            const teamsDisplay = document.getElementById('teams-display'); 
         
             teams.forEach(team => {
                 // Create a container for each team's information and chart
@@ -211,17 +211,17 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
-            margin-bottom: 10px; /* Reduce the space below each chart wrapper */
-            width: 180px; /* Reduce the width of each chart wrapper to fit more charts */
+            margin-bottom: 10px; 
+            width: 180px; 
         }
         h5 {
-            font-size: 14px; /* Slightly smaller font size for team names */
-            margin-bottom: 5px; /* Less spacing below the team name */
+            font-size: 14px; 
+            margin-bottom: 5px; 
         }
         canvas {
-            max-width: 200px; /* Reduce the chart size */
+            max-width: 200px; 
             height: auto !important;
-            max-height: 200px; /* Adjusts the size of the radar chart */    
+            max-height: 200px;
         }
 
     </style>
