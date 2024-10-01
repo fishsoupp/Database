@@ -103,6 +103,13 @@ def login():
                     session['admin_logged_in'] = True
                     session['admin_name'] = stored_admin_name  # Store admin name in session
                     session['admin_id'] = stored_id
+
+                    print(f"session['admin_id']: {session['admin_id']}") 
+
+                    with db.engine.connect() as conn:
+                        conn.execute(text(f"SET myapp.admin_id = {stored_id};"))
+                        conn.commit()
+                    
                     flash('Logged in successfully!', 'success')
                     return redirect(url_for('adminRoutes.adminLanding'))
                 else:
