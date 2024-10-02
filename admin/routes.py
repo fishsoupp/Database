@@ -78,7 +78,7 @@ def update_profile():
 
             conn.execute(sql, sql_params)
             conn.commit()
-       
+            session['admin_name'] = admin_name
             flash('Profile updated successfully!', 'success')
     except Exception as e:
         flash(f'Failed to update profile: {str(e)}', 'danger')
@@ -103,6 +103,13 @@ def login():
                     session['admin_logged_in'] = True
                     session['admin_name'] = stored_admin_name  # Store admin name in session
                     session['admin_id'] = stored_id
+
+                    print(f"session['admin_id']: {session['admin_id']}") 
+
+                    with db.engine.connect() as conn:
+                        conn.execute(text(f"SET myapp.admin_id = {stored_id};"))
+                        conn.commit()
+                    
                     flash('Logged in successfully!', 'success')
                     return redirect(url_for('adminRoutes.adminLanding'))
                 else:

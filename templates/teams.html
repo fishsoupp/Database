@@ -8,17 +8,61 @@
 
     <!-- Search bar -->
     <div class="mb-4">
-        <form method="GET" action="{{ url_for('teams') }}">
-            <div class="input-group">
-                <input type="text" name="q" class="form-control" placeholder="Search by name or continent" value="{{ search_query }}">
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="submit">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </div>
-            </div>
+        <form method="GET" action="{{ url_for('teams') }}" class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="Search by name or continent" value="{{ search_query }}">
+            <button class="btn btn-outline-secondary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+            <!-- Filter Button -->
+            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#filterModal">
+                <i class="fas fa-filter"></i> Filters
+            </button>
         </form>
     </div>
+
+    <!-- Filter Modal -->
+    <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="filterModalLabel">Advanced Filters</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="filterForm">
+                        <!-- Filter by Number of Matches Played -->
+                        <div class="mb-3">
+                            <label for="matchesPlayed" class="form-label">Minimum Number of Matches Played</label>
+                            <input type="number" class="form-control" id="matchesPlayed" name="matches_played" min="0" placeholder="Enter minimum matches" value="{{ matches_played or '' }}">
+                        </div>
+    
+                        <!-- Filter by Number of Player Caps -->
+                        <div class="mb-3">
+                            <label for="playerCaps" class="form-label">Minimum Number of Caps for Players</label>
+                            <input type="number" class="form-control" id="playerCaps" name="player_caps" min="0" placeholder="Enter minimum caps" value="{{ player_caps or '' }}">
+                        </div>
+    
+                        <!-- Filter by Range of Matches (for Union query) -->
+                        <div class="mb-3">
+                            <label for="matchRange" class="form-label">Range of Matches Played</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="minMatches" name="min_matches" min="0" placeholder="Min Matches" value="{{ min_matches or '' }}">
+                                <span class="input-group-text">to</span>
+                                <input type="number" class="form-control" id="maxMatches" name="max_matches" min="0" placeholder="Max Matches" value="{{ max_matches or '' }}">
+                            </div>
+                        </div>
+    
+                        <!-- Apply and Close Buttons -->
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Apply Filters</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
 
     <!-- Team cards and modals -->
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4">
@@ -68,27 +112,27 @@
                 <a class="page-link" href="{{ url_for('teams', page=page-1) }}">Previous</a>
             </li>
             {% endif %}
-
+    
             {% if start_page > 1 %}
             <li class="page-item">
                 <a class="page-link" href="{{ url_for('teams', page=1) }}">1</a>
             </li>
             <li class="page-item disabled"><span class="page-link">...</span></li>
             {% endif %}
-
+    
             {% for i in range(start_page, end_page + 1) %}
             <li class="page-item {% if page == i %}active{% endif %}">
                 <a class="page-link" href="{{ url_for('teams', page=i) }}">{{ i }}</a>
             </li>
             {% endfor %}
-
+    
             {% if end_page < total_pages %}
             <li class="page-item disabled"><span class="page-link">...</span></li>
             <li class="page-item">
                 <a class="page-link" href="{{ url_for('teams', page=total_pages) }}">{{ total_pages }}</a>
             </li>
             {% endif %}
-
+    
             {% if page < total_pages %}
             <li class="page-item">
                 <a class="page-link" href="{{ url_for('teams', page=page+1) }}">Next</a>
@@ -100,4 +144,15 @@
         </ul>
     </nav>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function submitFilters() {
+        var form = document.getElementById("filterForm");
+        var searchParams = new URLSearchParams(new FormData(form)).toString();
+        var currentUrl = window.location.href.split('?')[0]; // Get the base URL without query params
+        window.location.href = currentUrl + "?" + searchParams;
+    }
+</script>
 {% endblock %}

@@ -7,6 +7,7 @@ from math import ceil
 import json
 from decimal import Decimal
 
+
 from os import getenv
 from dotenv import load_dotenv
 
@@ -393,34 +394,78 @@ def ranking(page):
 
 
 
+
 @app.route('/teams', defaults={'page': 1})
 @app.route('/teams/page/<int:page>')
 def teams(page):
     search_query = request.args.get('q', '')  # Get search term from query parameters
-    per_page = 20  # Display 30 teams per page
+    matches_played = request.args.get('matches_played', None, type=int)  # Get number of matches played
+    player_caps = request.args.get('player_caps', None, type=int)  # Get player caps filter
+    min_matches = request.args.get('min_matches', None, type=int)  # Minimum matches for range
+    max_matches = request.args.get('max_matches', None, type=int)  # Maximum matches for range
+
+    per_page = 20  # Display 20 teams per page
     offset = (page - 1) * per_page
 
-    # Create the search filter
-    search_filter = f"%{search_query}%"
+    # Base query filter
+    filters = ["(team_name ILIKE :search_filter OR continent ILIKE :search_filter)"]
+    query_params = {"search_filter": f"%{search_query}%"}
 
-    # Fetch the total number of teams, including search filtering
-    total_teams_query = text("""
-        SELECT COUNT(*) FROM teams
-        WHERE team_name ILIKE :search_filter OR continent ILIKE :search_filter
+    # Handle the "Minimum Number of Matches Played" filter
+    if matches_played is not None:
+        filters.append("""
+            (SELECT COUNT(*) FROM matches WHERE matches.home_team_id = teams.team_id OR matches.away_team_id = teams.team_id) >= :matches_played
+        """)
+        query_params["matches_played"] = matches_played
+
+    # Handle the "Minimum Number of Caps" filter (assuming caps are in the players table)
+    if player_caps is not None:
+        filters.append("""
+            EXISTS (
+                SELECT 1
+                FROM players
+                WHERE players.team_id = teams.team_id
+                GROUP BY players.team_id
+                HAVING SUM(players.caps) >= :player_caps
+            )
+        """)
+        query_params["player_caps"] = player_caps
+
+    # Handle the "Range of Matches Played" filter (Union of teams with min and max matches played)
+    if min_matches is not None and max_matches is not None:
+        filters.append("""
+            teams.team_id IN (
+                SELECT team_id
+                FROM matches
+                WHERE matches.home_team_id = teams.team_id OR matches.away_team_id = teams.team_id
+                GROUP BY team_id
+                HAVING COUNT(match_id) BETWEEN :min_matches AND :max_matches
+            )
+        """)
+        query_params["min_matches"] = min_matches
+        query_params["max_matches"] = max_matches
+
+    # Combine the filters into the SQL query
+    filters_query = " AND ".join(filters)
+
+    # Fetch the total number of teams based on filters
+    total_teams_query = text(f"""
+        SELECT COUNT(*)
+        FROM teams
+        WHERE {filters_query}
     """)
-    with db.engine.connect() as connection:
-        total_teams = connection.execute(total_teams_query, {"search_filter": search_filter}).scalar()
 
-    # Fetch the teams for the current page, including search filtering
-    query = text("""
+    # Fetch the filtered teams
+    query = text(f"""
         SELECT team_id, team_name, fifa_code, continent
         FROM teams
-        WHERE team_name ILIKE :search_filter OR continent ILIKE :search_filter
+        WHERE {filters_query}
         LIMIT :per_page OFFSET :offset
     """)
-    
+
     with db.engine.connect() as connection:
-        result = connection.execute(query, {"per_page": per_page, "offset": offset, "search_filter": search_filter})
+        total_teams = connection.execute(total_teams_query, query_params).scalar()
+        result = connection.execute(query, {**query_params, "per_page": per_page, "offset": offset})
 
         teams = []
         for row in result.mappings():
@@ -430,16 +475,17 @@ def teams(page):
                 "fifa_code": row["fifa_code"],
                 "continent": row["continent"]
             })
-    
+
     # Calculate total pages
     total_pages = ceil(total_teams / per_page)
 
-    # Define the range of visible pages around the current page
+    # Calculate pagination range
     visible_pages = 5
     start_page = max(1, page - visible_pages // 2)
-    end_page = min(total_pages, page + visible_pages // 2)
+    end_page = min(total_pages, start_page + visible_pages - 1)
 
-    return render_template("teams.html", teams=teams, page=page, total_pages=total_pages, start_page=start_page, end_page=end_page, search_query=search_query)
+    # Render the template with teams and pagination
+    return render_template("teams.html", teams=teams, page=page, total_pages=total_pages, start_page=start_page, end_page=end_page, search_query=search_query, matches_played=matches_played, player_caps=player_caps, min_matches=min_matches, max_matches=max_matches)
 
 
 
@@ -542,29 +588,83 @@ def players(page):
 @app.route('/match/page/<int:page>')
 def match(page):
     search_query = request.args.get('q', '')  # Get search term from query parameters
-    per_page = 30  # Display 10 matches per page
+    intersect_team = request.args.get('intersect_team', None)  # Intersect team filter
+    except_team = request.args.get('except_team', None)  # Except team filter
+    goals_threshold = request.args.get('goals_threshold', None, type=int)  # Goals threshold filter
+    per_page = 30  # Display 30 matches per page
     offset = (page - 1) * per_page
     
+    # Fetch teams for the dropdown options in the filter modal
+    teams_query = text("SELECT team_name FROM teams")
+    with db.engine.connect() as connection:
+        teams_result = connection.execute(teams_query).mappings().all()
+    teams = [row["team_name"] for row in teams_result]  # Fetch teams as a list
+
     # Create the search filter
     search_filter = f"%{search_query}%"
-    
-    # Fetch the total number of matches
-    total_matches_query = text("""
+
+    # Base query filter
+    filters = ["""
+        (home_team.team_name ILIKE :search_filter 
+        OR away_team.team_name ILIKE :search_filter 
+        OR stadiums.stadium_name ILIKE :search_filter)
+    """]
+    query_params = {"search_filter": search_filter}
+
+    # Handle the "INTERSECT" filter for team intersection
+    if intersect_team:
+        filters.append(f"""
+            matches.match_id IN (
+                SELECT match_id FROM matches WHERE matches.home_team_id IN (
+                    SELECT team_id FROM teams WHERE team_name = :intersect_team
+                )
+                UNION
+                SELECT match_id FROM matches WHERE matches.away_team_id IN (
+                    SELECT team_id FROM teams WHERE team_name = :intersect_team
+                )
+            )
+
+        """)
+        query_params["intersect_team"] = intersect_team
+
+    # Handle the "EXCEPT" filter to exclude a team
+    if except_team:
+        filters.append(f"""
+            matches.match_id NOT IN (
+                SELECT match_id FROM matches WHERE matches.home_team_id IN (
+                    SELECT team_id FROM teams WHERE team_name = :except_team
+                )
+                UNION
+                SELECT match_id FROM matches WHERE matches.away_team_id IN (
+                    SELECT team_id FROM teams WHERE team_name = :except_team
+                )
+            )
+        """)
+        query_params["except_team"] = except_team
+
+    # Handle the "SOME" filter for minimum goals scored
+    if goals_threshold:
+        filters.append(f"""
+            (matches.home_team_goals >= :goals_threshold 
+            OR matches.away_team_goals >= :goals_threshold)
+        """)
+        query_params["goals_threshold"] = goals_threshold
+
+    # Combine the filters into the SQL query
+    filters_query = " AND ".join(filters)
+
+    # Fetch the total number of matches based on filters
+    total_matches_query = text(f"""
         SELECT COUNT(*)
         FROM matches
         JOIN teams AS home_team ON matches.home_team_id = home_team.team_id
         JOIN teams AS away_team ON matches.away_team_id = away_team.team_id
         JOIN stadiums ON matches.stadium_id = stadiums.stadium_id
-        WHERE home_team.team_name ILIKE :search_filter
-        OR away_team.team_name ILIKE :search_filter
-        OR stadiums.stadium_name ILIKE :search_filter
+        WHERE {filters_query}
     """)
-    
-    with db.engine.connect() as connection:
-        total_matches = connection.execute(total_matches_query, {"search_filter": search_filter}).scalar()
 
-    # Fetch the matches for the current page
-    query = text("""
+    # Fetch the filtered matches
+    query = text(f"""
         SELECT home_team.team_name AS home_team_name,
                away_team.team_name AS away_team_name,
                matches.home_team_goals,
@@ -575,15 +675,14 @@ def match(page):
         JOIN teams AS home_team ON matches.home_team_id = home_team.team_id
         JOIN teams AS away_team ON matches.away_team_id = away_team.team_id
         JOIN stadiums ON matches.stadium_id = stadiums.stadium_id
-        WHERE home_team.team_name ILIKE :search_filter
-        OR away_team.team_name ILIKE :search_filter
-        OR stadiums.stadium_name ILIKE :search_filter
-        ORDER BY matches.home_team_goals DESC
+        WHERE {filters_query}
+        ORDER BY matches.match_id DESC
         LIMIT :per_page OFFSET :offset
     """)
-    
+
     with db.engine.connect() as connection:
-        result = connection.execute(query, {"per_page": per_page, "offset": offset, "search_filter": search_filter})
+        total_matches = connection.execute(total_matches_query, query_params).scalar()
+        result = connection.execute(query, {**query_params, "per_page": per_page, "offset": offset})
 
         matches = []
         for row in result.mappings():
@@ -595,7 +694,7 @@ def match(page):
                 "round": row["round"],
                 "venue": row["venue"]
             })
-    
+
     # Calculate total pages
     total_pages = ceil(total_matches / per_page)
 
@@ -604,9 +703,7 @@ def match(page):
     start_page = max(1, page - visible_pages // 2)
     end_page = min(total_pages, page + visible_pages // 2)
 
-    return render_template("matches.html", matches=matches, page=page, total_pages=total_pages, start_page=start_page, end_page=end_page, search_query=search_query)
-
-
+    return render_template("matches.html", matches=matches, page=page, total_pages=total_pages, start_page=start_page, end_page=end_page, search_query=search_query, intersect_team=intersect_team, except_team=except_team, goals_threshold=goals_threshold, teams=teams)
 
 
 
