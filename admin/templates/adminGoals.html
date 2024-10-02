@@ -178,6 +178,8 @@
       </div>
     </div>
   </div>
+  {% endfor %}
+
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
@@ -204,7 +206,7 @@
     });
   });
 </script>
-{% endfor %}
+
 
 <!-- Pagination -->
 <nav aria-label="Page navigation" class="mt-5">
@@ -276,6 +278,6 @@
     });
   });
 </script>
-{% endfor %}
+
 
 {% endblock %}

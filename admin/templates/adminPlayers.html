@@ -74,7 +74,7 @@
           <form action="{{ url_for('adminRoutes.update_player', player_id=player.player_id) }}" method="post">
             <div class="mb-3">
               <label for="playerName-{{ player.player_id }}" class="form-label">Player Name</label>
-              <input type="text" class="form-control" id="playerName-{{ player.player_id }}" name="playerName" value="{{ player.player_name }}" required>
+              <input type="text" class="form-control" id="playerName-{{ player.player_id }}" name="playerName" value="{{ player.player_name }}" placeholder="Enter player name" required>
             </div>
             <div class="mb-3">
               <label for="team-{{ player.player_id }}" class="form-label">Team</label>
@@ -87,7 +87,7 @@
             
             <div class="mb-3">
               <label for="position-{{ player.player_id }}" class="form-label">Position</label>
-              <input type="text" class="form-control" id="position-{{ player.player_id }}" name="position" value="{{ player.position }}" required>
+              <input type="text" class="form-control" id="position-{{ player.player_id }}" name="position" value="{{ player.position }}" placeholder="Enter position" required>
             </div>
             <div class="mb-3">
               <label for="dateOfBirth-{{ player.player_id }}" class="form-label">Date of Birth</label>
@@ -95,7 +95,7 @@
             </div>
             <div class="mb-3">
               <label for="caps-{{ player.player_id }}" class="form-label">Caps</label>
-              <input type="number" class="form-control" id="caps-{{ player.player_id }}" name="caps" value="{{ player.caps }}" required>
+              <input type="number" class="form-control" id="caps-{{ player.player_id }}" name="caps" value="{{ player.caps }}" placeholder="Enter number of caps" required>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
