@@ -3,11 +3,22 @@
 {% block title %}Tournaments Management{% endblock %}
 
 {% block content %}
-<h2>Tournaments Management</h2>
-<button class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#createTournamentModal">Create Tournament</button>
-
+<div class="card mt-4 mb-4 custom-card">
+  <div class="card-body-custom">
+    <div class="text-center mt-5">
+      <h2 class="mb-0">Tournaments Management</h2>
+      <button class="btn mb-4 rounded-pill mt-5" style="background-color: transparent; border: 1px solid #ffc107; color: #ffc107;" data-bs-toggle="modal" data-bs-target="#createTournamentModal">Create New Tournament</button>
+    </div>
+  </div>
+</div>
+<div class="container mt-4 mb-4">
+  <form class="d-flex p-2" role="search" style="background-color: rgba(0, 0, 0, 0.5); border-radius: 0.5rem;">
+    <input id="searchInput" class="form-control me-2" type="search" placeholder="Search" aria-label="Search" style="background-color: transparent; color: white; border: 1px solid white;">
+      <button class="btn btn-outline-light" type="submit">Search</button>
+  </form>
+</div>
 <!-- Table for Tournaments -->
-<table class="table">
+<table class="table table-striped table-dark">
   <thead>
     <tr>
       <th>Tournament ID</th>
@@ -29,8 +40,12 @@
       <td>{{ tournament.runner_up_name }}</td>
       <td>{{ tournament.matches_played }}</td>
       <td>
-        <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editTournamentModal-{{ tournament.tournament_id }}">Edit</button>
-        <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteTournamentModal-{{ tournament.tournament_id }}">Delete</button>
+        <button class="btn btn-sm" style="background-color: transparent; border: 1px solid transparent;" data-bs-toggle="modal" data-bs-target="#editTournamentModal-{{ tournament.tournament_id }}">
+          <i class="fas fa-pencil" style="color: #FFC107;"></i> 
+      </button>
+      <button class="btn btn-sm" style="background-color: transparent; border: 1px solid transparent;" data-bs-toggle="modal" data-bs-target="#deleteTournamentModal-{{ tournament.tournament_id }}">
+        <i class="fas fa-trash" style="color: #dc3545;"></i> 
+    </button>
       </td>
     </tr>
     {% endfor %}
@@ -39,9 +54,9 @@
 
 <!-- Pagination -->
 <nav aria-label="Page navigation" class="mt-5">
-  <ul class="pagination justify-content-center pagination-container">
+  <ul class="pagination justify-content-center pagination-container ">
       {% if page > 1 %}
-      <li class="page-item">
+      <li class="page-item ">
           <a class="page-link" href="{{ url_for('adminRoutes.goals_management', page=1) }}">First</a>
       </li>
       <li class="page-item">
@@ -58,7 +73,7 @@
 
       {% for i in range(start_page, end_page + 1) %}
       <li class="page-item {% if page == i %}active{% endif %}">
-          <a class="page-link" href="{{ url_for('adminRoutes.goals_management', page=i) }}">{{ i }}</a>
+        <a class="page-link" href="{{ url_for('adminRoutes.goals_management', page=i) }}" style="color: white; background-color: rgba(0, 0, 0, 0.954); border: none;">{{ i }}</a>
       </li>
       {% endfor %}
 
@@ -200,6 +215,34 @@
       </div>
     </div>
   </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const tableRows = document.querySelectorAll('table tbody tr');
+
+    searchInput.addEventListener('input', function() {
+      const filter = searchInput.value.toLowerCase();
+
+      tableRows.forEach(row => {
+        const cells = row.getElementsByTagName('td');
+        let rowVisible = false;
+
+        // Check each cell in the row for a match
+        for (let i = 0; i < cells.length; i++) {
+          if (cells[i].textContent.toLowerCase().includes(filter)) {
+            rowVisible = true;
+            break;
+          }
+        }
+
+        // Show or hide the row based on the match
+        row.style.display = rowVisible ? '' : 'none';
+      });
+    });
+  });
+</script>
 {% endfor %}
 
 {% endblock %}
+
