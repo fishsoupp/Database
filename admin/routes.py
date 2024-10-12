@@ -259,7 +259,9 @@ def update_player(player_id):
         # Query for updating of player
         sql = text("""
             UPDATE 
-                players player_name = :player_name, 
+                players 
+            SET
+                player_name = :player_name, 
                 team_id = :team_id, 
                 position = :position, 
                 date_of_birth = :date_of_birth, 
@@ -487,11 +489,19 @@ def update_match(match_id):
 # Match Delete
 @adminRoutes.route('/matches/delete/<int:match_id>', methods=['POST'])
 def delete_match(match_id):
+
+    delete_player_performance_sql = text("DELETE FROM player_performance WHERE match_id = :match_id")
+
+    # Query to delete the goals of the match
+    delete_goals_sql = text("DELETE FROM goals WHERE match_id = :match_id")
+
     # Query to delete the match
     sql = text("DELETE FROM matches WHERE match_id = :match_id")
     
     try:
         with db.engine.connect() as conn:
+            conn.execute(delete_player_performance_sql, {'match_id': match_id})
+            conn.execute(delete_goals_sql, {'match_id': match_id})  # Delete related goals first
             conn.execute(sql, {'match_id': match_id})
             conn.commit() 
             flash(f"Match with ID {match_id} deleted successfully!", 'success')
