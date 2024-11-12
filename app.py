@@ -39,24 +39,18 @@ def decimal_default(obj):
 
 @app.route('/')
 def home():
-    # Get the current page number from the query parameters, defaulting to 1
     page = request.args.get('page', 1, type=int)
     
-    # Get the search query from the user input
-    search_query = request.args.get('q', '')  # Get the search term from the query parameters
+    search_query = request.args.get('q', '')  
 
-    # Set the number of items to display per page for paginated sections
-    per_page = 10  # Show 5 items per page for most sections
-    radar_chart_per_page = 21  # Show 18 teams at once for radar charts
-    
-    # Calculate the offset for the SQL query based on the current page number
+    per_page = 10  
+    radar_chart_per_page = 21  
     offset = (page - 1) * per_page
     radar_offset = (page - 1) * radar_chart_per_page
 
-    # Search filter to match the teams based on user input
-    search_filter = f"%{search_query}%"  # Search term for filtering teams
+    search_filter = f"%{search_query}%"  
 
-    # Query for Most FIFA World Cup Wins (Paginated)
+    # Query for Most FIFA World Cup Wins 
     query_wc_wins = text("""
         SELECT teams.team_name, COUNT(tournaments.tournament_id) AS world_cup_wins
         FROM teams
@@ -66,7 +60,7 @@ def home():
         LIMIT :per_page OFFSET :offset
     """)
 
-    # Query for Most Goals Scored by a Specific Player (Paginated)
+    # Query for Most Goals Scored by a Specific Player 
     query_most_goals = text("""
         SELECT players.player_name, SUM(player_performance.goals_scored) AS total_goals
         FROM players
@@ -76,7 +70,7 @@ def home():
         LIMIT :per_page OFFSET :offset
     """)
 
-    # Query for Recent Match Results (Paginated)
+    # Query for Recent Match Results 
     query_recent_matches = text("""
         SELECT home_team.team_name AS home_team, away_team.team_name AS away_team,
                matches.home_team_goals, matches.away_team_goals, matches.match_id
@@ -87,7 +81,7 @@ def home():
         LIMIT :per_page OFFSET :offset
     """)
 
-    # Query for Most Red/Yellow Cards (Paginated)
+    # Query for Most Red/Yellow Cards 
     query_most_cards = text("""
         SELECT players.player_name, SUM(player_performance.yellow_cards) AS total_yellow, SUM(player_performance.red_cards) AS total_red
         FROM players
@@ -97,7 +91,7 @@ def home():
         LIMIT :per_page OFFSET :offset
     """)
 
-    # Radar chart data: Fetch teams and their stats for radar chart display (Limited to 18 per page)
+    # Radar chart data: Fetch teams and their stats for radar chart display 
     query_team_stats = text("""
         SELECT teams.team_name, 
             AVG(CASE 
@@ -134,7 +128,7 @@ def home():
             "radar_offset": radar_offset
         }).fetchall()
 
-        # Properly format the team_stats data into dictionaries for JSON conversion
+        # Properly format the team_stats data into dictionaries
         teams_data = []
         for team in team_stats:
             teams_data.append({
@@ -145,43 +139,31 @@ def home():
                 "win_rate": float(team.win_rate) if team.win_rate is not None else 0
             })
 
-    # Total number of teams for pagination (for radar charts)
+    # Total number of teams for pagination 
     query_total_teams = text("SELECT COUNT(*) FROM teams WHERE team_name ILIKE :search_filter")
     with db.engine.connect() as connection:
         total_teams = connection.execute(query_total_teams, {"search_filter": search_filter}).scalar()
 
-    # Calculate total pages based on total teams for radar charts
-    # total_radar_pages = (total_teams + radar_chart_per_page - 1) // radar_chart_per_page
     total_pages = (total_teams + per_page - 1) // per_page 
 
-    # Render the template with the relevant data
     return render_template(
         'index.html',
         wc_wins=wc_wins,
         most_goals=most_goals,
         recent_matches=recent_matches,
         most_cards=most_cards,
-        teams_data=json.dumps(teams_data, default=decimal_default),  # Limited to 18 teams
+        teams_data=json.dumps(teams_data, default=decimal_default), 
         page=page,
-        total_pages=total_pages,  # Used for radar chart pagination
+        total_pages=total_pages, 
         search_query=search_query
     )
-
-
-
-
-
-
-
-
-
 
 
 @app.route('/teams_radar', defaults={'page': 1})
 @app.route('/teams_radar/page/<int:page>')
 def teams_radar(page):
-    search_query = request.args.get('q', '')  # Get search term from query parameters
-    per_page = 5  # Show 5 teams per page
+    search_query = request.args.get('q', '') 
+    per_page = 5 
     offset = (page - 1) * per_page
     search_filter = f"%{search_query}%"
     
@@ -256,7 +238,6 @@ def teams_radar(page):
         aggressiveness_data = connection.execute(query_aggressiveness, {"per_page": per_page, "offset": offset, "search_filter": search_filter}).fetchall()
         win_rate_data = connection.execute(query_win_rate, {"per_page": per_page, "offset": offset, "search_filter": search_filter}).fetchall()
     
-    # Combine all data for radar chart rendering
     teams_data = []
     for i in range(len(offensive_data)):
         team = {
@@ -268,7 +249,6 @@ def teams_radar(page):
         }
         teams_data.append(team)
 
-    # Query for pagination total number of teams
     query_total_teams = text("""
         SELECT COUNT(*) FROM teams WHERE team_name ILIKE :search_filter
     """)
@@ -276,28 +256,22 @@ def teams_radar(page):
     with db.engine.connect() as connection:
         total_teams = connection.execute(query_total_teams, {"search_filter": search_filter}).scalar()
 
-    total_pages = (total_teams + per_page - 1) // per_page  # Calculate total pages
+    total_pages = (total_teams + per_page - 1) // per_page  
 
     return render_template(
         'index.html',
-        teams_data=teams_data,  # Teams' radar chart data
+        teams_data=teams_data,  
         page=page,
-        per_page=per_page,  # Pass per_page to template
+        per_page=per_page, 
         total_pages=total_pages,
         search_query=search_query
     )
 
-
-
-# @app.route('/index')
-# def index():
-#     return render_template("index.html")
-
 @app.route('/ranking', defaults={'page': 1})
 @app.route('/ranking/page/<int:page>')
 def ranking(page):
-    search_query = request.args.get('q', '')  # Get search term from query parameters
-    per_page = 20  # Number of teams per page
+    search_query = request.args.get('q', '')  
+    per_page = 20 
     offset = (page - 1) * per_page
     
     search_filter = f"%{search_query}%"
@@ -365,18 +339,18 @@ def ranking(page):
     with db.engine.connect() as connection:
         total_teams = connection.execute(query_total_teams).scalar()
 
-    total_pages = (total_teams + per_page - 1) // per_page  # Calculate total pages
+    total_pages = (total_teams + per_page - 1) // per_page  
 
     # Pagination logic
-    visible_pages = 5  # Number of visible page links
+    visible_pages = 5  
     start_page = max(1, page - visible_pages // 2)
     end_page = min(total_pages, start_page + visible_pages - 1)
 
     return render_template(
         'ranking.html',
-        teams=teams,  # Teams fetched from the database
+        teams=teams, 
         page=page,
-        per_page=per_page,  # Pass per_page to template
+        per_page=per_page,  
         total_pages=total_pages,
         start_page=start_page,
         end_page=end_page,
@@ -384,27 +358,16 @@ def ranking(page):
     )
 
 
-
-
-
-
-
-
-
-
-
-
-
 @app.route('/teams', defaults={'page': 1})
 @app.route('/teams/page/<int:page>')
 def teams(page):
-    search_query = request.args.get('q', '')  # Get search term from query parameters
-    matches_played = request.args.get('matches_played', None, type=int)  # Get number of matches played
-    player_caps = request.args.get('player_caps', None, type=int)  # Get player caps filter
-    min_matches = request.args.get('min_matches', None, type=int)  # Minimum matches for range
-    max_matches = request.args.get('max_matches', None, type=int)  # Maximum matches for range
+    search_query = request.args.get('q', '') 
+    matches_played = request.args.get('matches_played', None, type=int)  
+    player_caps = request.args.get('player_caps', None, type=int)  
+    min_matches = request.args.get('min_matches', None, type=int)
+    max_matches = request.args.get('max_matches', None, type=int)  
 
-    per_page = 20  # Display 20 teams per page
+    per_page = 20  
     offset = (page - 1) * per_page
 
     # Base query filter
@@ -418,7 +381,7 @@ def teams(page):
         """)
         query_params["matches_played"] = matches_played
 
-    # Handle the "Minimum Number of Caps" filter (assuming caps are in the players table)
+    # Handle the "Minimum Number of Caps" filter 
     if player_caps is not None:
         filters.append("""
             EXISTS (
@@ -431,7 +394,7 @@ def teams(page):
         """)
         query_params["player_caps"] = player_caps
 
-    # Handle the "Range of Matches Played" filter (Union of teams with min and max matches played)
+    # Handle the "Range of Matches Played" filter
     if min_matches is not None and max_matches is not None:
         filters.append("""
             teams.team_id IN (
@@ -484,22 +447,18 @@ def teams(page):
     start_page = max(1, page - visible_pages // 2)
     end_page = min(total_pages, start_page + visible_pages - 1)
 
-    # Render the template with teams and pagination
     return render_template("teams.html", teams=teams, page=page, total_pages=total_pages, start_page=start_page, end_page=end_page, search_query=search_query, matches_played=matches_played, player_caps=player_caps, min_matches=min_matches, max_matches=max_matches)
-
-
-
 
 
 @app.route('/players', defaults={'page': 1})
 @app.route('/players/page/<int:page>')
 def players(page):
-    search_query = request.args.get('q', '')  # Get search term from query parameters
-    caps = request.args.get('caps', None, type=int)  # Get caps filter
-    birth_year = request.args.get('birth_year', None, type=int)  # Get birth year filter
-    countries = request.args.getlist('countries[]')  # Get selected countries (array of countries)
+    search_query = request.args.get('q', '') 
+    caps = request.args.get('caps', None, type=int) 
+    birth_year = request.args.get('birth_year', None, type=int)  
+    countries = request.args.getlist('countries[]')  
 
-    per_page = 30  # Display 30 players per page
+    per_page = 30 
     offset = (page - 1) * per_page
     
     # Base SQL query for filtering
@@ -519,12 +478,12 @@ def players(page):
     # Apply country filter if selected countries are provided
     if countries:
         filters.append("teams.team_name IN :countries")
-        query_params["countries"] = tuple(countries)  # Pass as a tuple for SQL IN clause
+        query_params["countries"] = tuple(countries) 
 
     # Combine the filters into the query
     filters_query = " AND ".join(filters)
 
-    # Query to get the list of distinct countries (team names)
+    # Query to get the list of distinct countries 
     countries_query = text("""
         SELECT DISTINCT teams.team_name
         FROM teams
@@ -549,9 +508,9 @@ def players(page):
     """)
     
     with db.engine.connect() as connection:
-        # Fetch the list of distinct countries (team names)
+        # Fetch the list of distinct countries 
         countries_list = connection.execute(countries_query).mappings().fetchall()
-        countries = [{'team_name': row["team_name"]} for row in countries_list]  # Format countries
+        countries = [{'team_name': row["team_name"]} for row in countries_list] 
 
         total_players = connection.execute(total_players_query, query_params).scalar()
 
@@ -581,24 +540,21 @@ def players(page):
         selected_countries=countries, countries=countries)
 
 
-
-
-
 @app.route('/match', defaults={'page': 1})
 @app.route('/match/page/<int:page>')
 def match(page):
-    search_query = request.args.get('q', '')  # Get search term from query parameters
-    intersect_team = request.args.get('intersect_team', None)  # Intersect team filter
-    except_team = request.args.get('except_team', None)  # Except team filter
-    goals_threshold = request.args.get('goals_threshold', None, type=int)  # Goals threshold filter
-    per_page = 30  # Display 30 matches per page
+    search_query = request.args.get('q', '') 
+    intersect_team = request.args.get('intersect_team', None)  
+    except_team = request.args.get('except_team', None)  
+    goals_threshold = request.args.get('goals_threshold', None, type=int)  
+    per_page = 30  
     offset = (page - 1) * per_page
     
     # Fetch teams for the dropdown options in the filter modal
     teams_query = text("SELECT team_name FROM teams")
     with db.engine.connect() as connection:
         teams_result = connection.execute(teams_query).mappings().all()
-    teams = [row["team_name"] for row in teams_result]  # Fetch teams as a list
+    teams = [row["team_name"] for row in teams_result]  
 
     # Create the search filter
     search_filter = f"%{search_query}%"
@@ -704,7 +660,6 @@ def match(page):
     end_page = min(total_pages, page + visible_pages // 2)
 
     return render_template("matches.html", matches=matches, page=page, total_pages=total_pages, start_page=start_page, end_page=end_page, search_query=search_query, intersect_team=intersect_team, except_team=except_team, goals_threshold=goals_threshold, teams=teams)
-
 
 
 if __name__ == '__main__':

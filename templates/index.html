@@ -4,61 +4,92 @@
 
 {% block content %}
 <div class="container mt-5">
-    <!-- Section for Most FIFA World Cup Wins -->
+    <!-- Section for Most FIFA World Cup Wins, Top Scorers, and Players with Most Yellow/Red Cards -->
     <div class="row">
-        <div class="col-lg-6">
-            <h4>Most FIFA World Cup Wins</h4>
-            <ul>
-                {% for team in wc_wins %}
-                <li>{{ team.team_name }} - {{ team.world_cup_wins }} wins</li>
-                {% endfor %}
-            </ul>
+        <!-- Most FIFA World Cup Wins -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header text-center" style="background-color: #dbecd4">
+                    <h5 class="mb-0">Most FIFA World Cup Wins</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for team in wc_wins %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: #FFFCF7;">
+                        {{ team.team_name }}
+                        <span class="badge bg-success rounded-pill">{{ team.world_cup_wins }} wins</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
         </div>
 
-        <!-- Section for Top Scorers -->
-        <div class="col-lg-6">
-            <h4>Top Scorers</h4>
-            <ul>
-                {% for player in most_goals %}
-                <li>{{ player.player_name }} - {{ player.total_goals }} goals</li>
-                {% endfor %}
-            </ul>
+        <!-- Top Scorers -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header text-center" style="background-color: #dbecd4">
+                    <h5 class="mb-0">Top Scorers</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for player in most_goals %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: #FFFCF7;">
+                        {{ player.player_name }}
+                        <span class="badge bg-warning rounded-pill">{{ player.total_goals }} goals</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Players with Most Yellow and Red Cards -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header text-center" style="background-color: #dbecd4;">
+                    <h5 class="mb-0">Players with Most Yellow and Red Cards</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for player in most_cards %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: #FFFCF7;">
+                        {{ player.player_name }}
+                        <span>
+                            <span class="badge bg-warning">{{ player.total_yellow }} Yellow</span>
+                            <span class="badge bg-danger">{{ player.total_red }} Red</span>
+                        </span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
         </div>
     </div>
 
     <!-- Section for Recent Match Results -->
     <div class="mt-5">
-        <h4>Recent Match Results</h4>
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Home Team</th>
-                    <th>Away Team</th>
-                    <th>Home Goals</th>
-                    <th>Away Goals</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for match in recent_matches %}
-                <tr>
-                    <td>{{ match.home_team }}</td>
-                    <td>{{ match.away_team }}</td>
-                    <td>{{ match.home_team_goals }}</td>
-                    <td>{{ match.away_team_goals }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Section for Most Red/Yellow Cards -->
-    <div class="mt-5">
-        <h4>Players with Most Yellow and Red Cards</h4>
-        <ul>
-            {% for player in most_cards %}
-            <li>{{ player.player_name }} - Yellow Cards: {{ player.total_yellow }}, Red Cards: {{ player.total_red }}</li>
-            {% endfor %}
-        </ul>
+        <h4 class="text-center">Recent Match Results</h4>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-bordered">
+                <thead class="text-center">
+                    <tr>
+                        <th style="background-color:#dbecd4;">Home Team</th>
+                        <th style="background-color:#dbecd4;">Away Team</th>
+                        <th style="background-color:#dbecd4;">Home Goals</th>
+                        <th style="background-color:#dbecd4;">Away Goals</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for match in recent_matches %}
+                    <tr class="text-center">
+                        <td class="align-middle" style="background-color: #FFFCF7;">{{ match.home_team }}</td>
+                        <td class="align-middle" style="background-color: #FFFCF7;">{{ match.away_team }}</td>
+                        <td class="align-middle" style="background-color: #FFFCF7;">
+                            <span class="badge bg-success">{{ match.home_team_goals }}</span>
+                        </td>
+                        <td class="align-middle" style="background-color: #FFFCF7;">
+                            <span class="badge bg-success">{{ match.away_team_goals }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <!-- Radar Charts Section for All Teams -->
@@ -80,8 +111,8 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const teams = JSON.parse('{{ teams_data | safe }}'); // Load team data
-            const teamsDisplay = document.getElementById('teams-display'); // Get the container for teams
+            const teams = JSON.parse('{{ teams_data | safe }}');
+            const teamsDisplay = document.getElementById('teams-display'); 
         
             teams.forEach(team => {
                 // Create a container for each team's information and chart
@@ -174,24 +205,24 @@
             flex-wrap: wrap;
             justify-content: space-between;
             height: 550px;
-        
         }
         .chart-wrapper {
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            margin-bottom: 10px; /* Reduce the space below each chart wrapper */
-            width: 180px; /* Reduce the width of each chart wrapper to fit more charts */
+            margin-bottom: 10px; 
+            width: 180px; 
         }
         h5 {
-            font-size: 14px; /* Slightly smaller font size for team names */
-            margin-bottom: 5px; /* Less spacing below the team name */
+            font-size: 14px; 
+            margin-bottom: 5px; 
         }
         canvas {
-            max-width: 200px; /* Reduce the chart size */
+            max-width: 200px; 
             height: auto !important;
-            max-height: 200px; /* Adjusts the size of the radar chart */
+            max-height: 200px;
         }
+
     </style>
 {% endblock %}

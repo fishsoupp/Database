@@ -3,8 +3,8 @@
 {% block title %}World Ranking{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2 class="text-left mb-4">World Ranking</h2>
+<div class="container">
+    <h2 class="mt-4 mb-4">World Ranking</h2>
 
     <!-- Search bar -->
     <div class="mb-4">
@@ -21,22 +21,22 @@
     </div>
 
     <!-- Ranking Table -->
-    <table class="table table-hover mt-4">
+    <table class="table table-striped table-hover table-bordered">
         <thead>
-            <tr>
-                <th>Rank</th>
-                <th>Team</th>
-                <th>Matches Won</th>
-                <th>World Cup Wins</th>
+            <tr class="text-center">
+                <th class="align-middle" style="background-color:#dbecd4;">Rank</th>
+                <th class="align-middle" style="background-color:#dbecd4;">Team</th>
+                <th class="align-middle" style="background-color:#dbecd4;">Matches Won</th>
+                <th class="align-middle" style="background-color:#dbecd4;">World Cup Wins</th>
             </tr>
         </thead>
         <tbody>
             {% for team in teams %}
-            <tr>
-                <td>{{ loop.index + (page - 1) * per_page }}</td> <!-- Adjust rank for pagination -->
-                <td>{{ team.team_name }}</td>
-                <td>{{ team.matches_won }}</td>
-                <td>{{ team.world_cup_wins }}</td>
+            <tr class="text-center">
+                <td class="align-middle" style="background-color: #FFFCF7;">{{ loop.index + (page - 1) * per_page }}</td> <!-- Adjust rank for pagination -->
+                <td class="align-middle" style="background-color: #FFFCF7;">{{ team.team_name }}</td>
+                <td class="align-middle" style="background-color: #FFFCF7;">{{ team.matches_won }}</td>
+                <td class="align-middle" style="background-color: #FFFCF7;">{{ team.world_cup_wins }}</td>
             </tr>
             {% endfor %}
         </tbody>
