@@ -4,10 +4,18 @@
 
 {% block extra_head %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    .card:hover {
+        transform: scale(1.05);  
+        transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out; 
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); 
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<!-- Your existing content here -->
+
 <div class="container">
     <h3 class="mt-4 mb-4">Players</h3>
 
@@ -44,24 +52,25 @@
                         <div class="mb-3">
                             <label for="birthYear" class="form-label">Birth Year</label>
                             <select class="form-control" id="birthYear" name="birth_year">
-                                <option value="">Select a Year</option>
-                                {% for year in range(1900, 2024) %} <!-- Adjust range as needed -->
+                                <option value="">Select a Year...</option>
+                                {% for year in range(1900, 2024) %}
                                 <option value="{{ year }}">{{ year }}</option>
                                 {% endfor %}
                             </select>
                         </div>
                         <!-- Country Selection -->
                         <div class="mb-3">
-                            <label for="country" class="form-label">Country</label>
+                            <label for="country" class="form-label">Select Multiple Countries:</label>
                             <select class="form-control" id="country" name="countries[]" multiple>
                                 {% for country in countries %}
                                 <option value="{{ country['team_name'] }}">{{ country['team_name'] }}</option>
                                 {% endfor %}
                             </select>
                         </div>
-
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary" onclick="submitFilters()">Apply Filters</button>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary" onclick="submitFilters()">Apply Filters</button>
+                        </div>   
                     </form>
                 </div>
             </div>
@@ -73,7 +82,7 @@
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4">
         {% for player in players %}
         <div class="col mb-4">
-            <div class="card h-100" data-bs-toggle="modal" data-bs-target="#playerModal{{ player.player_id }}" style="cursor: pointer;">
+            <div class="card h-100" style="background-color: #FFFCF7;" data-bs-toggle="modal" data-bs-target="#playerModal{{ player.player_id }}" style="cursor: pointer;">
                 <div class="card-body">
                     <h6 class="card-title">{{ player.player_name }}</h6>
                     <p class="card-text">
