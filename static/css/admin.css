@@ -4,63 +4,141 @@
     height: 100vh;
     min-width: 250px;
     position: fixed;
-}
-
-#sidebar .list-group-item {
+  }
+  
+  #sidebar .list-group-item {
     background-color: #343a40;
     border: none;
     padding: 15px 20px;
     margin-bottom: 10px;
-}
-
-#sidebar .list-group-item a {
+  }
+  
+  #sidebar .list-group-item a {
     color: white;
     text-decoration: none;
-}
-
-#sidebar .list-group-item a:hover {
+  }
+  
+  #sidebar .list-group-item a:hover {
     color: #007bff;
-    text-decoration: none; 
-}
-
-/* Active link styling */
-#sidebar .list-group-item .active {
-    color: #007bff; 
+    text-decoration: none;
+  }
+  
+  /* Active link styling */
+  #sidebar .list-group-item .active {
+    color: #007bff;
     font-weight: bold;
-}
-
-/* Page Content Wrapper */
-#page-content-wrapper {
+  }
+  
+  /* Page Content Wrapper */
+  #page-content-wrapper {
     margin-left: 250px;
     width: calc(100% - 250px);
-}
-
-.navbar {
+  }
+  
+  .navbar {
     background-color: #f8f9fa;
-}
-
-.dropdown-menu {
+  }
+  
+  .dropdown-menu {
     text-align: center;
-}
-
-.dropdown-menu-end {
+  }
+  
+  .dropdown-menu-end {
     right: 0;
     left: auto;
     margin-top: 10px;
-}
-
-.navbar-nav .nav-item {
+  }
+  
+  .navbar-nav .nav-item {
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-.card {
+  }
+  
+  .card {
     border: none;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-}
-
-#topScorerGraph, #nextMatchGraph {
+  }
+  
+  #topScorerGraph,
+  #nextMatchGraph {
     width: 300px !important;
-    height: 300px !important; 
-}
+    height: 300px !important;
+  }
+  
+  .custom-card {
+    background-image: url("https://img.pikbest.com/wp/202347/soccer-field-illustration-minimalistic-3d-rendering-of-a-for-presenting-football-match-posters-or-banners-stunning_9746315.jpg!sw800");
+    background-size: cover;
+    background-position: center;
+    width: 100%;
+    height: 300px;
+    color: white;
+    border-radius: 15px;
+    overflow: hidden;
+  }
+  
+  .card-body-custom {
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
+  body {
+    background-color: #3a3b3c;
+    color: #ffffff;
+  }
+  .card {
+    background-color: #1e1e1e;
+    color: #ffffff;
+  }
+  .table {
+    background-color: #1e1e1e;
+    color: #ffffff;
+  }
+  .modal-content {
+    background-color: #1e1e1e;
+    color: #ffffff;
+  }
+  .modal-header {
+    border-bottom: 1px solid #333;
+  }
+  .form-label {
+    color: #ffffff;
+  }
+  
+  h2 {
+    font-size: 56px;
+    margin: 0;
+  }
+  .form-control::placeholder {
+    color: white;
+    opacity: 0.7;
+  }
+  .dropdown-menu {
+    background-color: #343a40;
+    border: none;
+    color: white;
+  }
+  
+  .dropdown-item {
+    color: white;
+  }
+  
+  .dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .dropdown-divider {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .modal-header .btn-close {
+    filter: brightness(0) invert(1);
+  }
+  
+  .modal-header .btn-close:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  

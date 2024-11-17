@@ -2,8 +2,20 @@
 
 {% block title %}Teams{% endblock %}
 
+{% block extra_head %}
+<style>
+    .card:hover {
+        transform: scale(1.05);  
+        transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out; 
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);  
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container">
+    
+
     <h3 class="mt-4 mb-4">Teams</h3>
 
     <!-- Search bar -->
@@ -67,8 +79,8 @@
     <!-- Team cards and modals -->
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4">
         {% for team in teams %}
-        <div class="col mb-4">
-            <div class="card h-100" data-bs-toggle="modal" data-bs-target="#teamModal{{ team.team_id }}" style="cursor: pointer;">
+        <div class="col mb-4 team-card " >
+            <div class="card h-100" style="background-color: #FFFCF7;" data-bs-toggle="modal" data-bs-target="#teamModal{{ team.team_id }}" style="cursor: pointer;">
                 <div class="card-body">
                     <h6 class="card-title">{{ team.team_name }}</h6>
                     <p class="card-text">
@@ -156,3 +168,4 @@
     }
 </script>
 {% endblock %}
+
