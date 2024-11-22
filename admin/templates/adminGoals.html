@@ -16,7 +16,6 @@
 <table class="table table-striped table-dark">
   <thead>
     <tr>
-      <th>Goal ID</th>
       <th>Player</th>
       <th>Match</th>
       <th>Minute Scored</th>
@@ -28,9 +27,8 @@
   <tbody>
     {% for goal in goals %}
     <tr>
-      <td>{{ goal.goal_id }}</td>
-      <td>{{ goal.player_name }}</td>
-      <td>{{ goal.home_team_name }} vs {{ goal.away_team_name }}</td>
+      <td>{{ goal.player.player_name }}</td>
+      <td>{{ goal.match.home_team.team_name }} vs {{ goal.match.away_team.team_name }}</td>
       <td>{{ goal.minute_scored }}</td>
       <td>{{ "Yes" if goal.is_penalty else "No" }}</td>
       <td>{{ "Yes" if goal.is_own_goal else "No" }}</td>
@@ -76,7 +74,7 @@
             <select class="form-control" id="match" name="match" required>
               <option value="" disabled selected>Select a match...</option>
               {% for match in matches %}
-              <option value="{{ match.match_id }}">{{ match.home_team_name }} vs {{ match.away_team_name }} - {{ match.tournament_year }}</option>
+              <option value="{{ match.match_id }}">{{ match.home_team.team_name }} vs {{ match.away_team.team_name }}</option>
               {% endfor %}
             </select>
           </div>
@@ -117,7 +115,7 @@
               <label for="playerEdit-{{ goal.goal_id }}" class="form-label">Player</label>
               <select class="form-control" id="playerEdit-{{ goal.goal_id }}" name="player" required>
                 {% for player in players %}
-                <option value="{{ player.player_id }}" {% if goal.player_id == player.player_id %}selected{% endif %}>{{ player.player_name }}</option>
+                <option value="{{ player.player_id }}" {% if goal.player.player_id == player.player_id %}selected{% endif %}>{{ player.player_name }}</option>
                 {% endfor %}
               </select>
             </div>
@@ -125,7 +123,7 @@
               <label for="matchEdit-{{ goal.goal_id }}" class="form-label">Match</label>
               <select class="form-control" id="matchEdit-{{ goal.goal_id }}" name="match" required>
                 {% for match in matches %}
-                <option value="{{ match.match_id }}" {% if goal.match_id == match.match_id %}selected{% endif %}>{{ match.home_team_name }} vs {{ match.away_team_name }} - {{ match.tournament_year }}</option>
+                <option value="{{ match.match_id }}" {% if goal.match.match_id == match.match_id %}selected{% endif %}>{{ match.home_team.team_name }} vs {{ match.away_team.team_name }} - {{ match.tournament_year }}</option>
                 {% endfor %}
               </select>
             </div>
@@ -161,7 +159,7 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          Are you sure you want to delete the goal by {{ goal.player_name }} in the match {{ goal.home_team_name }} vs {{ goal.away_team_name }}?
+          Are you sure you want to delete the goal by {{ goal.player.player_name }} in the match {{ goal.match.home_team.team_name }} vs {{ goal.match.away_team.team_name }}?
         </div>
         <div class="modal-footer">
           <form action="{{ url_for('adminRoutes.delete_goal', goal_id=goal.goal_id) }}" method="POST">

@@ -1,6 +1,5 @@
 from flask import Flask, redirect, url_for, render_template, request
 from extensions import bcrypt, db  # Import bcrypt and db from extensions
-from admin.routes import adminRoutes  # Import the adminRoutes blueprint
 from flask_bcrypt import Bcrypt
 from pymongo import MongoClient
 from os import getenv
@@ -18,6 +17,8 @@ bcrypt = Bcrypt(app)
 
 # MongoDB connection
 client = MongoClient(getenv('MONGODB_URI'))
+app.config['SECRET_KEY'] = '\xb0\t\xce\x90\x1a\xb7\xfb\x1e\xdb\xb5\xdd\xc0'
+
 db = client.get_database('FIFA_DB')
 
 def decimal_default(obj):
@@ -26,6 +27,7 @@ def decimal_default(obj):
         return float(obj)
     raise TypeError
 
+from admin.routes import adminRoutes
 app.register_blueprint(adminRoutes, url_prefix="/admin")
 
 @app.route('/')
@@ -39,16 +41,16 @@ def home():
     # Most FIFA World Cup Wins
     wc_wins = list(db.teams.aggregate([
         {
-            "$lookup": {
-                "from": "tournaments",
-                "localField": "team_id",
-                "foreignField": "winning_team_id",
-                "as": "wins"
+            "$lookup": {                            # join
+                "from": "tournaments",              # join which table
+                "localField": "team_id",            # by the team's id
+                "foreignField": "winning_team_id",  # tournament's team's id
+                "as": "wins"                        # as the new name 
             }
         },
         {
-            "$addFields": {
-                "world_cup_wins": {"$size": "$wins"}
+            "$addFields": {                         # new column
+                "world_cup_wins": {"$size": "$wins"}# name world_cup_wins
             }
         },
         {"$sort": {"world_cup_wins": -1}},

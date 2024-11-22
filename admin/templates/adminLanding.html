@@ -20,15 +20,14 @@
 
 {% block extra_scripts %}
 <script>
-    // Graph for Total Goals by Teams in Latest Tournament
     const ctxGoals = document.getElementById('totalGoalsGraph').getContext('2d');
     const totalGoalsChart = new Chart(ctxGoals, {
-        type: 'bar', // Bar chart for total goals by teams
+        type: 'bar',
         data: {
-            labels: {{ teams|tojson }}, // Team names passed from the backend
+            labels: {{ teams|tojson }},
             datasets: [{
                 label: 'Total Goals',
-                data: {{ goals|tojson }}, // Goals data passed from the backend
+                data: {{ goals|tojson }},
                 backgroundColor: 'rgba(255, 99, 132, 0.5)',
                 borderColor: 'rgba(255, 99, 132, 1)',
                 borderWidth: 1
@@ -41,4 +40,5 @@
         }
     });
 </script>
+
 {% endblock %}
