@@ -1,10 +1,12 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, session, request, current_app
+from flask import Blueprint, jsonify, render_template, redirect, url_for, flash, session, request, current_app
 from sqlalchemy.sql import text
-from app import db, bcrypt  # Import db and bcrypt from app.py
-from pymongo import MongoClient
+from app import db, client, bcrypt  # Import db and bcrypt from app.py
+from pymongo import MongoClient, errors
 from .forms import LoginForm
 from datetime import date
 from bson.objectid import ObjectId
+from os import getenv
+
 
 adminRoutes = Blueprint("adminRoutes", __name__, template_folder="templates")
 
@@ -172,77 +174,141 @@ def players_management(page):
 @adminRoutes.route('/players/add', methods=['POST'])
 def add_player():
     if request.method == 'POST':
+        # Fetch the data from the form
+        team_oid = request.form.get('team')  # Team ID
+        player_name = request.form.get('playerName').strip()  # Player name
 
-        # Fetch the selected team details
-        team_oid = request.form.get('team')  # Fetch the team's ObjectId as a string
-        team_details = db.teams.find_one({"_id": ObjectId(team_oid)})  # Find team by ObjectId
-
-        if not team_details:
-            flash("Selected team not found!", "danger")
-            return redirect(url_for('adminRoutes.players_management'))
-
-        # Prepare the new player data
-        player = {
-            "player_name": request.form.get('playerName'),
-            "team": { 
-                "_id": team_details["_id"],  # Use ObjectId from the team
-                "team_name": team_details["team_name"],
-                "continent": team_details.get("continent", ""),  
-                "fifa_code": team_details.get("fifa_code", "")      
-            },
-            "position": request.form.get('position'),
-            "date_of_birth": request.form.get('date_of_birth'),
-            "caps": int(request.form.get('caps')),
-            "player_performance": []  # Initialize an empty performance array
-        }
+        # Start a client session for the transaction
+        session = client.start_session()
 
         try:
-            db.players.insert_one(player)
+            # Start a transaction
+            session.start_transaction()
+
+            # Fetch the team details within the transaction
+            team_details = db.teams.find_one({"_id": ObjectId(team_oid)}, session=session)
+
+            if not team_details:
+                flash("Selected team not found!", "danger")
+                session.abort_transaction()
+                return redirect(url_for('adminRoutes.players_management'))
+
+            # Check if the player already exists in the selected team within the transaction
+            existing_player = db.players.find_one(
+                {"player_name": player_name, "team._id": team_details["_id"]},
+                session=session
+            )
+            if existing_player:
+                flash("This player already exists in the selected team!", "danger")
+                session.abort_transaction()
+                return redirect(url_for('adminRoutes.players_management'))
+
+            # Prepare player data
+            player = {
+                "player_name": player_name,
+                "team": {
+                    "_id": team_details["_id"],
+                    "team_name": team_details["team_name"],
+                    "continent": team_details.get("continent", ""),
+                    "fifa_code": team_details.get("fifa_code", "")
+                },
+                "position": request.form.get('position'),
+                "date_of_birth": request.form.get('date_of_birth'),
+                "caps": int(request.form.get('caps')),
+                "player_performance": []
+            }
+
+            # Insert the new player within the transaction
+            db.players.insert_one(player, session=session)
+
+            # Commit the transaction
+            session.commit_transaction()
             flash('Player added successfully!', 'success')
-        except Exception as e:
-            flash(f"Error adding player: {str(e)}", 'danger')
+
+        except errors.DuplicateKeyError:
+            # Handle duplicate entry due to unique index
+            session.abort_transaction()
+            flash("This player already exists in the database!", "danger")
+        except errors.PyMongoError as e:
+            # Handle other MongoDB errors
+            session.abort_transaction()
+            flash(f"Error adding player: {str(e)}", "danger")
+        finally:
+            # End the session
+            session.end_session()
 
         return redirect(url_for('adminRoutes.players_management'))
-    
+
     return redirect(url_for('adminRoutes.players_management'))
 
 # Update Player
 @adminRoutes.route('/players/update/<string:_id>', methods=['POST'])
 def update_player(_id):
     if request.method == 'POST':
-
         # Convert the player ObjectId
         player_oid = ObjectId(_id)
 
-        # Get the team details from the teams collection
-        team_oid = request.form.get('team')
-        team = db.teams.find_one({"_id": ObjectId(team_oid)}, {"_id": 1, "team_name": 1, "fifa_code": 1, "continent": 1})
-
-        if not team:
-            flash(f"Team with ID {team_oid} not found.", 'danger')
-            return redirect(url_for('adminRoutes.players_management'))
-
-        # Prepare the player data with embedded team details
-        player_data = {
-            "player_name": request.form.get('playerName'),
-            "team": {
-                "_id": team["_id"],  
-                "team_name": team["team_name"],
-                "fifa_code": team.get("fifa_code", ""),
-                "continent": team.get("continent", "")
-            },
-            "position": request.form.get('position'),
-            "date_of_birth": request.form.get('dateOfBirth'),
-            "caps": int(request.form.get('caps'))
-        }
+        # Start a client session for the transaction
+        session = client.start_session()
 
         try:
-            # Update the player document
-            db.players.update_one({"_id": player_oid}, {"$set": player_data})
-            flash(f"Player updated successfully!", 'success')
+            # Start a transaction
+            session.start_transaction()
 
-        except Exception as e:
-            flash(f"Error updating player: {str(e)}", 'danger')
+            # Get the new team details from the form
+            team_oid = request.form.get('team')
+            team = db.teams.find_one({"_id": ObjectId(team_oid)}, {"_id": 1, "team_name": 1, "fifa_code": 1, "continent": 1}, session=session)
+
+            if not team:
+                flash(f"Team with ID {team_oid} not found.", 'danger')
+                session.abort_transaction()
+                return redirect(url_for('adminRoutes.players_management'))
+
+            # Get the new player details from the form
+            player_name = request.form.get('playerName').strip()
+            position = request.form.get('position')
+            date_of_birth = request.form.get('dateOfBirth')
+            caps = int(request.form.get('caps'))
+
+            # Check if another player with the same name exists in the same team
+            existing_player = db.players.find_one(
+                {"player_name": player_name, "team._id": team["_id"], "_id": {"$ne": player_oid}},
+                session=session
+            )
+            if existing_player:
+                flash(f"A player with the name '{player_name}' already exists in the selected team.", 'danger')
+                session.abort_transaction()
+                return redirect(url_for('adminRoutes.players_management'))
+
+            # Prepare the updated player data
+            player_data = {
+                "player_name": player_name,
+                "team": {
+                    "_id": team["_id"],
+                    "team_name": team["team_name"],
+                    "fifa_code": team.get("fifa_code", ""),
+                    "continent": team.get("continent", "")
+                },
+                "position": position,
+                "date_of_birth": date_of_birth,
+                "caps": caps
+            }
+
+            # Update the player document within the transaction
+            db.players.update_one({"_id": player_oid}, {"$set": player_data}, session=session)
+
+            # Commit the transaction
+            session.commit_transaction()
+            flash("Player updated successfully!", "success")
+
+        except errors.PyMongoError as e:
+            # Handle MongoDB errors
+            session.abort_transaction()
+            flash(f"Error updating player: {str(e)}", "danger")
+
+        finally:
+            # End the session
+            session.end_session()
 
     return redirect(url_for('adminRoutes.players_management'))
 
@@ -259,6 +325,15 @@ def delete_player(_id):
         flash(f"Error deleting player: {str(e)}", 'danger')
 
     return redirect(url_for('adminRoutes.players_management'))
+
+@adminRoutes.route('/api/check_player_exists', methods=['GET'])
+def check_player_exists():
+    player_name = request.args.get('player_name').strip()
+    team_id = request.args.get('team_id')
+
+    existing_player = db.players.find_one({"player_name": player_name, "team._id": ObjectId(team_id)})
+    return jsonify({"exists": bool(existing_player)})
+
 
 ##### Matches Management #####
 # Matches
@@ -317,128 +392,200 @@ def matches_management(page):
     return render_template("adminMatches.html", matches=matches, teams=teams,stadiums=stadiums, referees=referees, tournaments=tournaments, page=page, total_pages=total_pages, start_page=start_page, end_page=end_page)
 
 # Add Match
+# Add Match
 @adminRoutes.route('/matches/add', methods=['POST'])
 def add_match():
     if request.method == 'POST':
-
-         # Fetch tournament details
-        tournament_id = request.form.get('tournament')
-        tournament = db.tournaments.find_one({"_id": ObjectId(tournament_id)}, {"_id": 1})
-        if not tournament:
-            flash('Tournament not found.', 'danger')
-            return redirect(url_for('adminRoutes.matches_management'))
-
-        # Fetch referee details
-        referee_id = request.form.get('referee')
-        referee = db.referees.find_one({"_id": ObjectId(referee_id)}, {"_id": 1, "referee_name": 1})
-        if not referee:
-            flash('Referee not found.', 'danger')
-            return redirect(url_for('adminRoutes.matches_management'))
-
-        # Fetch stadium details
-        stadium_id = request.form.get('stadium')
-        stadium = db.stadiums.find_one({"_id": ObjectId(stadium_id)}, {"_id": 1, "stadium_name": 1, "city": 1})
-        if not stadium:
-            flash('Stadium not found.', 'danger')
-            return redirect(url_for('adminRoutes.matches_management'))
-
-        # Fetch home team details
-        home_team_id = request.form.get('homeTeam')
-        home_team = db.teams.find_one({"_id": ObjectId(home_team_id)}, {"_id": 1, "team_name": 1, "continent": 1, "fifa_code": 1})
-        if not home_team:
-            flash('Home team not found.', 'danger')
-            return redirect(url_for('adminRoutes.matches_management'))
-
-        # Fetch away team details
-        away_team_id = request.form.get('awayTeam')
-        away_team = db.teams.find_one({"_id": ObjectId(away_team_id)}, {"_id": 1, "team_name": 1, "continent": 1, "fifa_code": 1})
-        if not away_team:
-            flash('Away team not found.', 'danger')
-            return redirect(url_for('adminRoutes.matches_management'))
-
-
-        # Prepare the match document
-        match = {
-            "tournament_id": tournament["_id"],
-            "home_team": home_team, 
-            "away_team": away_team, 
-            "home_team_goal": int(request.form.get('home_team_goals')),
-            "away_team_goal": int(request.form.get('away_team_goals')),
-            "round": request.form.get('round'),
-            "referee": referee,
-            "stadium": stadium
-        }
+        # Start a client session for the transaction
+        session = client.start_session()
 
         try:
-            db.matches.insert_one(match)
+            # Start a transaction
+            session.start_transaction()
+
+            # Fetch tournament details within the transaction
+            tournament_id = request.form.get('tournament')
+            tournament = db.tournaments.find_one({"_id": ObjectId(tournament_id)}, session=session)
+            if not tournament:
+                flash('Tournament not found.', 'danger')
+                session.abort_transaction()
+                return redirect(url_for('adminRoutes.matches_management'))
+
+            # Fetch referee details within the transaction
+            referee_id = request.form.get('referee')
+            referee = db.referees.find_one({"_id": ObjectId(referee_id)}, {"_id": 1, "referee_name": 1}, session=session)
+            if not referee:
+                flash('Referee not found.', 'danger')
+                session.abort_transaction()
+                return redirect(url_for('adminRoutes.matches_management'))
+
+            # Fetch stadium details within the transaction
+            stadium_id = request.form.get('stadium')
+            stadium = db.stadiums.find_one({"_id": ObjectId(stadium_id)}, {"_id": 1, "stadium_name": 1, "city": 1}, session=session)
+            if not stadium:
+                flash('Stadium not found.', 'danger')
+                session.abort_transaction()
+                return redirect(url_for('adminRoutes.matches_management'))
+
+            # Fetch home team details within the transaction
+            home_team_id = request.form.get('homeTeam')
+            home_team = db.teams.find_one({"_id": ObjectId(home_team_id)}, {"_id": 1, "team_name": 1, "continent": 1, "fifa_code": 1}, session=session)
+            if not home_team:
+                flash('Home team not found.', 'danger')
+                session.abort_transaction()
+                return redirect(url_for('adminRoutes.matches_management'))
+
+            # Fetch away team details within the transaction
+            away_team_id = request.form.get('awayTeam')
+            away_team = db.teams.find_one({"_id": ObjectId(away_team_id)}, {"_id": 1, "team_name": 1, "continent": 1, "fifa_code": 1}, session=session)
+            if not away_team:
+                flash('Away team not found.', 'danger')
+                session.abort_transaction()
+                return redirect(url_for('adminRoutes.matches_management'))
+
+            # Check if a similar match already exists within the transaction
+            existing_match = db.matches.find_one({
+                "tournament_id": tournament["_id"],
+                "home_team._id": home_team["_id"],
+                "away_team._id": away_team["_id"],
+            }, session=session)
+            if existing_match:
+                flash("This match already exists in the tournament!", "danger")
+                session.abort_transaction()
+                return redirect(url_for('adminRoutes.matches_management'))
+
+            # Prepare the match document
+            match = {
+                "tournament_id": tournament["_id"],
+                "home_team": home_team,
+                "away_team": away_team,
+                "home_team_goal": int(request.form.get('home_team_goals')),
+                "away_team_goal": int(request.form.get('away_team_goals')),
+                "round": request.form.get('round'),
+                "referee": referee,
+                "stadium": stadium
+            }
+
+            # Insert the new match within the transaction
+            db.matches.insert_one(match, session=session)
+
+            # Commit the transaction
+            session.commit_transaction()
             flash('Match added successfully!', 'success')
-        except Exception as e:
-            flash(f"Error adding match: {str(e)}", 'danger')
+        except errors.DuplicateKeyError:
+            # Handle duplicate entry due to unique index
+            session.abort_transaction()
+            flash("This match already exists in the database!", "danger")
+        except errors.PyMongoError as e:
+            # Handle other MongoDB errors
+            session.abort_transaction()
+            flash(f"Error adding match: {str(e)}", "danger")
+        finally:
+            # End the session
+            session.end_session()
 
         return redirect(url_for('adminRoutes.matches_management'))
 
     return redirect(url_for('adminRoutes.matches_management'))
 
+
 # Update Match
 @adminRoutes.route('/matches/update/<string:_id>', methods=['POST'])
 def update_match(_id):
     if request.method == 'POST':
-
         # Convert the match _id from string to ObjectId
         match_oid = ObjectId(_id)
 
-        # Fetch tournament details
-        tournament_id = request.form.get('tournament')
-        tournament = db.tournaments.find_one({"_id": ObjectId(tournament_id)}, {"_id": 1})
-        if not tournament:
-            flash('Tournament not found.', 'danger')
-            return redirect(url_for('adminRoutes.matches_management'))
-
-        # Fetch referee details
-        referee_id = request.form.get('referee')
-        referee = db.referees.find_one({"_id": ObjectId(referee_id)}, {"_id": 1, "referee_name": 1})
-        if not referee:
-            flash('Referee not found.', 'danger')
-            return redirect(url_for('adminRoutes.matches_management'))
-
-        # Fetch stadium details
-        stadium_id = request.form.get('stadium')
-        stadium = db.stadiums.find_one({"_id": ObjectId(stadium_id)}, {"_id": 1, "stadium_name": 1, "city": 1})
-        if not stadium:
-            flash('Stadium not found.', 'danger')
-            return redirect(url_for('adminRoutes.matches_management'))
-
-        # Fetch home team details
-        home_team_id = request.form.get('homeTeam')
-        home_team = db.teams.find_one({"_id": ObjectId(home_team_id)}, {"_id": 1, "team_name": 1, "continent": 1, "fifa_code": 1})
-        if not home_team:
-            flash('Home team not found.', 'danger')
-            return redirect(url_for('adminRoutes.matches_management'))
-
-        # Fetch away team details
-        away_team_id = request.form.get('awayTeam')
-        away_team = db.teams.find_one({"_id": ObjectId(away_team_id)}, {"_id": 1, "team_name": 1, "continent": 1, "fifa_code": 1})
-        if not away_team:
-            flash('Away team not found.', 'danger')
-            return redirect(url_for('adminRoutes.matches_management'))
-
-        # Prepare the updated match data
-        match_data = {
-            "tournament_id": tournament["_id"],
-            "home_team": home_team,
-            "away_team": away_team,
-            "home_team_goal": int(request.form.get('home_team_goals')),
-            "away_team_goal": int(request.form.get('away_team_goals')),
-            "round": request.form.get('round'),
-            "referee": referee,
-            "stadium": stadium
-        }
+        # Start a client session for the transaction
+        session = client.start_session()
 
         try:
-            db.matches.update_one({"_id": match_oid}, {"$set": match_data})
-            flash(f"Match updated successfully!", 'success')
-        except Exception as e:
-            flash(f"Error updating match: {str(e)}", 'danger')
+            # Start a transaction
+            session.start_transaction()
+
+            # Fetch tournament details within the transaction
+            tournament_id = request.form.get('tournament')
+            tournament = db.tournaments.find_one({"_id": ObjectId(tournament_id)}, {"_id": 1}, session=session)
+            if not tournament:
+                flash('Tournament not found.', 'danger')
+                session.abort_transaction()
+                return redirect(url_for('adminRoutes.matches_management'))
+
+            # Fetch referee details within the transaction
+            referee_id = request.form.get('referee')
+            referee = db.referees.find_one({"_id": ObjectId(referee_id)}, {"_id": 1, "referee_name": 1}, session=session)
+            if not referee:
+                flash('Referee not found.', 'danger')
+                session.abort_transaction()
+                return redirect(url_for('adminRoutes.matches_management'))
+
+            # Fetch stadium details within the transaction
+            stadium_id = request.form.get('stadium')
+            stadium = db.stadiums.find_one({"_id": ObjectId(stadium_id)}, {"_id": 1, "stadium_name": 1, "city": 1}, session=session)
+            if not stadium:
+                flash('Stadium not found.', 'danger')
+                session.abort_transaction()
+                return redirect(url_for('adminRoutes.matches_management'))
+
+            # Fetch home team details within the transaction
+            home_team_id = request.form.get('homeTeam')
+            home_team = db.teams.find_one({"_id": ObjectId(home_team_id)}, {"_id": 1, "team_name": 1, "continent": 1, "fifa_code": 1}, session=session)
+            if not home_team:
+                flash('Home team not found.', 'danger')
+                session.abort_transaction()
+                return redirect(url_for('adminRoutes.matches_management'))
+
+            # Fetch away team details within the transaction
+            away_team_id = request.form.get('awayTeam')
+            away_team = db.teams.find_one({"_id": ObjectId(away_team_id)}, {"_id": 1, "team_name": 1, "continent": 1, "fifa_code": 1}, session=session)
+            if not away_team:
+                flash('Away team not found.', 'danger')
+                session.abort_transaction()
+                return redirect(url_for('adminRoutes.matches_management'))
+
+            # Check if a similar match already exists (excluding the current match) within the transaction
+            existing_match = db.matches.find_one({
+                "tournament_id": tournament["_id"],
+                "home_team._id": home_team["_id"],
+                "away_team._id": away_team["_id"],
+                "_id": {"$ne": match_oid}  # Exclude the current match being updated
+            }, session=session)
+            if existing_match:
+                flash("A match with these details already exists!", "danger")
+                session.abort_transaction()
+                return redirect(url_for('adminRoutes.matches_management'))
+            # Prepare the updated match data
+            match_data = {
+                "tournament_id": tournament["_id"],
+                "home_team": home_team,
+                "away_team": away_team,
+                "home_team_goal": int(request.form.get('home_team_goals')),
+                "away_team_goal": int(request.form.get('away_team_goals')),
+                "round": request.form.get('round'),
+                "referee": referee,
+                "stadium": stadium
+            }
+
+            # Update the match within the transaction
+            db.matches.update_one({"_id": match_oid}, {"$set": match_data}, session=session)
+
+            # Commit the transaction
+            session.commit_transaction()
+            flash("Match updated successfully!", 'success')
+
+        except errors.DuplicateKeyError:
+            # Handle duplicate entry due to unique index
+            session.abort_transaction()
+            flash("This match already exists in the database!", "danger")
+        except errors.PyMongoError as e:
+            # Handle other MongoDB errors
+            session.abort_transaction()
+            flash(f"Error updating match: {str(e)}", "danger")
+        finally:
+            # End the session
+            session.end_session()
+
+        return redirect(url_for('adminRoutes.matches_management'))
 
     return redirect(url_for('adminRoutes.matches_management'))
 
@@ -517,72 +664,144 @@ def goals_management(page):
 def add_goal():
     if request.method == 'POST':
 
-        # Fetch match details
+        # Fetch match and player details from the form
         match_id = request.form.get('match')
-        match = db.matches.find_one({"_id": ObjectId(match_id)}, {"_id": 1})
-        if not match:
-            flash('Match not found.', 'danger')
-            return redirect(url_for('adminRoutes.goals_management'))
-
-        # Fetch player details
         player_id = request.form.get('player')
-        player = db.players.find_one({"_id": ObjectId(player_id)}, {"_id": 1})
-        if not player:
-            flash('Player not found.', 'danger')
-            return redirect(url_for('adminRoutes.goals_management'))
+        minute_scored = request.form.get('minute') + "'"
+        is_penalty = 'penalty' in request.form
+        is_own_goal = 'ownGoal' in request.form
 
-
-        # Prepare the goal document
-        goal = {
-            "player_id": ObjectId(player_id),
-            "match_id": ObjectId(match_id),
-            "minute_scored": request.form.get('minute') + "'",
-            "is_penalty": 'penalty' in request.form,
-            "is_own_goal": 'ownGoal' in request.form
-        }
+        # Start a client session for the transaction
+        session = client.start_session()
 
         try:
-            db.goals.insert_one(goal)
+            # Start the transaction
+            session.start_transaction()
+
+            # Fetch match details within the transaction
+            match = db.matches.find_one({"_id": ObjectId(match_id)}, {"_id": 1}, session=session)
+            if not match:
+                flash('Match not found.', 'danger')
+                session.abort_transaction()
+                return redirect(url_for('adminRoutes.goals_management'))
+
+            # Fetch player details within the transaction
+            player = db.players.find_one({"_id": ObjectId(player_id)}, {"_id": 1}, session=session)
+            if not player:
+                flash('Player not found.', 'danger')
+                session.abort_transaction()
+                return redirect(url_for('adminRoutes.goals_management'))
+
+            # Check if a goal with the same match_id and minute_scored already exists
+            existing_goal = db.goals.find_one(
+                {"match_id": ObjectId(match_id), "minute_scored": minute_scored},
+                session=session
+            )
+            if existing_goal:
+                flash('A goal at this time in the match has already been recorded.', 'danger')
+                session.abort_transaction()
+                return redirect(url_for('adminRoutes.goals_management'))
+
+            # Prepare the goal document
+            goal = {
+                "player_id": ObjectId(player_id),
+                "match_id": ObjectId(match_id),
+                "minute_scored": minute_scored,
+                "is_penalty": is_penalty,
+                "is_own_goal": is_own_goal
+            }
+
+            # Insert the goal document within the transaction
+            db.goals.insert_one(goal, session=session)
+
+            # Commit the transaction
+            session.commit_transaction()
             flash('Goal recorded successfully!', 'success')
-        except Exception as e:
+
+        except errors.DuplicateKeyError:
+            # Handle unique constraint violation
+            session.abort_transaction()
+            flash("A goal with the same match and time already exists.", "danger")
+        except errors.PyMongoError as e:
+            # Handle other MongoDB errors
+            session.abort_transaction()
             flash(f"Error adding goal: {str(e)}", 'danger')
+        finally:
+            # End the session
+            session.end_session()
 
         return redirect(url_for('adminRoutes.goals_management'))
 
 # Update Goal
 @adminRoutes.route('/goals/update/<string:_id>', methods=['POST'])
 def update_goal(_id):
-
     goal_oid = ObjectId(_id)
 
-     # Fetch match details
-    match_id = request.form.get('match')
-    match = db.matches.find_one({"_id": ObjectId(match_id)}, {"_id": 1})
-    if not match:
-        flash('Match not found.', 'danger')
-        return redirect(url_for('adminRoutes.goals_management'))
-
-    # Fetch player details
-    player_id = request.form.get('player')
-    player = db.players.find_one({"_id": ObjectId(player_id)}, {"_id": 1})
-    if not player:
-        flash('Player not found.', 'danger')
-        return redirect(url_for('adminRoutes.goals_management'))
-
-    # Prepare the updated goal data
-    goal_data = {
-        "player_id": ObjectId(player_id),
-        "match_id": ObjectId(match_id),
-        "minute_scored": request.form.get('minute') + "'",
-        "is_penalty": 'penalty' in request.form,
-        "is_own_goal": 'ownGoal' in request.form
-    }
+    # Start a client session for the transaction
+    session = client.start_session()
 
     try:
-        db.goals.update_one({"_id": goal_oid}, {"$set": goal_data})
-        flash(f"Goal updated successfully!", 'success')
-    except Exception as e:
-        flash(f"Error updating goal: {str(e)}", 'danger')
+        # Start the transaction
+        session.start_transaction()
+
+        # Fetch the updated match details
+        match_id = request.form.get('match')
+        match = db.matches.find_one({"_id": ObjectId(match_id)}, {"_id": 1}, session=session)
+        if not match:
+            flash('Match not found.', 'danger')
+            session.abort_transaction()
+            return redirect(url_for('adminRoutes.goals_management'))
+
+        # Fetch the updated player details
+        player_id = request.form.get('player')
+        player = db.players.find_one({"_id": ObjectId(player_id)}, {"_id": 1}, session=session)
+        if not player:
+            flash('Player not found.', 'danger')
+            session.abort_transaction()
+            return redirect(url_for('adminRoutes.goals_management'))
+
+        # Prepare the updated goal data
+        minute_scored = request.form.get('minute') + "'"
+        is_penalty = 'penalty' in request.form
+        is_own_goal = 'ownGoal' in request.form
+
+        # Check if another goal with the same match_id and minute_scored exists
+        existing_goal = db.goals.find_one(
+            {"match_id": ObjectId(match_id), "minute_scored": minute_scored, "_id": {"$ne": goal_oid}},
+            session=session
+        )
+        if existing_goal:
+            flash("A goal with the same match and minute already exists.", "danger")
+            session.abort_transaction()
+            return redirect(url_for('adminRoutes.goals_management'))
+
+        # Prepare the goal document for update
+        goal_data = {
+            "player_id": ObjectId(player_id),
+            "match_id": ObjectId(match_id),
+            "minute_scored": minute_scored,
+            "is_penalty": is_penalty,
+            "is_own_goal": is_own_goal
+        }
+
+        # Update the goal document within the transaction
+        db.goals.update_one({"_id": goal_oid}, {"$set": goal_data}, session=session)
+
+        # Commit the transaction
+        session.commit_transaction()
+        flash("Goal updated successfully!", "success")
+
+    except errors.DuplicateKeyError:
+        # Handle unique constraint violation
+        session.abort_transaction()
+        flash("A goal with the same match and minute already exists.", "danger")
+    except errors.PyMongoError as e:
+        # Handle other MongoDB errors
+        session.abort_transaction()
+        flash(f"Error updating goal: {str(e)}", "danger")
+    finally:
+        # End the session
+        session.end_session()
 
     return redirect(url_for('adminRoutes.goals_management'))
 
@@ -634,65 +853,131 @@ def tournaments_management(page):
 @adminRoutes.route('/tournaments/add', methods=['POST'])
 def add_tournament():
     if request.method == 'POST':
-
-        # Fetch the winner and runner-up team details from the database
-        winner_team_id = ObjectId(request.form.get('winner'))
-        winner_team = db.teams.find_one({"_id": winner_team_id}, {"team_name": 1, "continent": 1, "fifa_code": 1})
-
-        runner_up_team_id = ObjectId(request.form.get('runnerUp'))
-        runner_up_team = db.teams.find_one({"_id": runner_up_team_id}, {"team_name": 1, "continent": 1, "fifa_code": 1})
-        
-        if not winner_team or not runner_up_team:
-            flash("Invalid team selection for winner or runner-up.", 'danger')
-            return redirect(url_for('adminRoutes.tournaments_management'))
-
-        # Create tournament document
-        tournament = {
-            "year": int(request.form.get('year')),
-            "host_country": request.form.get('hostCountry'),
-            "winning_team": {**winner_team, "_id": winner_team_id},
-            "runner_up_team": {**runner_up_team, "_id": runner_up_team_id},
-            "matches_played": int(request.form.get('matchesPlayed')),
-            "scorers": []  # Default empty list for scorers
-        }
+        # Start a client session for the transaction
+        session = client.start_session()
 
         try:
-            db.tournaments.insert_one(tournament)
+            # Start a transaction
+            session.start_transaction()
+
+            # Fetch the winner and runner-up team details within the transaction
+            winner_team_id = ObjectId(request.form.get('winner'))
+            winner_team = db.teams.find_one({"_id": winner_team_id}, {"team_name": 1, "continent": 1, "fifa_code": 1}, session=session)
+
+            runner_up_team_id = ObjectId(request.form.get('runnerUp'))
+            runner_up_team = db.teams.find_one({"_id": runner_up_team_id}, {"team_name": 1, "continent": 1, "fifa_code": 1}, session=session)
+
+            if not winner_team or not runner_up_team:
+                flash("Invalid team selection for winner or runner-up.", 'danger')
+                session.abort_transaction()
+                return redirect(url_for('adminRoutes.tournaments_management'))
+
+            # Get the year of the tournament
+            year = int(request.form.get('year'))
+
+            # Check if a tournament for the given year already exists within the transaction
+            existing_tournament = db.tournaments.find_one({"year": year}, session=session)
+            if existing_tournament:
+                flash("A tournament for this year already exists!", "danger")
+                session.abort_transaction()
+                return redirect(url_for('adminRoutes.tournaments_management'))
+
+            # Create the tournament document
+            tournament = {
+                "year": year,
+                "host_country": request.form.get('hostCountry'),
+                "winning_team": {**winner_team, "_id": winner_team_id},
+                "runner_up_team": {**runner_up_team, "_id": runner_up_team_id},
+                "matches_played": int(request.form.get('matchesPlayed')),
+                "scorers": []  # Default empty list for scorers
+            }
+
+            # Insert the new tournament within the transaction
+            db.tournaments.insert_one(tournament, session=session)
+
+            # Commit the transaction
+            session.commit_transaction()
             flash('Tournament added successfully!', 'success')
-        except Exception as e:
-            flash(f"Error adding tournament: {str(e)}", 'danger')
+
+        except errors.DuplicateKeyError:
+            # Handle duplicate entry due to unique index
+            session.abort_transaction()
+            flash("A tournament for this year already exists!", "danger")
+        except errors.PyMongoError as e:
+            # Handle other MongoDB errors
+            session.abort_transaction()
+            flash(f"Error adding tournament: {str(e)}", "danger")
+        finally:
+            # End the session
+            session.end_session()
 
         return redirect(url_for('adminRoutes.tournaments_management'))
+
+    return redirect(url_for('adminRoutes.tournaments_management'))
+
 
 # Update Tournament
 @adminRoutes.route('/tournaments/update/<string:_id>', methods=['POST'])
 def update_tournament(_id):
-    
-    # Fetch the updated winner and runner-up team details from the database
-    winner_team_id = ObjectId(request.form.get('winner'))
-    winner_team = db.teams.find_one({"_id": winner_team_id}, {"team_name": 1, "continent": 1, "fifa_code": 1})
-
-    runner_up_team_id = ObjectId(request.form.get('runnerUp'))
-    runner_up_team = db.teams.find_one({"_id": runner_up_team_id}, {"team_name": 1, "continent": 1, "fifa_code": 1})
-
-    if not winner_team or not runner_up_team:
-        flash("Invalid team selection for winner or runner-up.", 'danger')
-        return redirect(url_for('adminRoutes.tournaments_management'))
-
-    # Prepare updated tournament data
-    tournament_data = {
-        "year": int(request.form.get('year')),
-        "host_country": request.form.get('hostCountry'),
-        "winning_team": {**winner_team, "_id": winner_team_id},
-        "runner_up_team": {**runner_up_team, "_id": runner_up_team_id},
-        "matches_played": int(request.form.get('matchesPlayed'))
-    }
+    # Start a client session for the transaction
+    session = client.start_session()
 
     try:
-        db.tournaments.update_one({"_id": ObjectId(_id)}, {"$set": tournament_data})
-        flash(f"Tournament updated successfully!", 'success')
-    except Exception as e:
-        flash(f"Error updating tournament: {str(e)}", 'danger')
+        # Start a transaction
+        session.start_transaction()
+
+        # Fetch the updated winner and runner-up team details within the transaction
+        winner_team_id = ObjectId(request.form.get('winner'))
+        winner_team = db.teams.find_one({"_id": winner_team_id}, {"team_name": 1, "continent": 1, "fifa_code": 1}, session=session)
+
+        runner_up_team_id = ObjectId(request.form.get('runnerUp'))
+        runner_up_team = db.teams.find_one({"_id": runner_up_team_id}, {"team_name": 1, "continent": 1, "fifa_code": 1}, session=session)
+
+        if not winner_team or not runner_up_team:
+            flash("Invalid team selection for winner or runner-up.", 'danger')
+            session.abort_transaction()
+            return redirect(url_for('adminRoutes.tournaments_management'))
+
+        # Get the updated year of the tournament
+        year = int(request.form.get('year'))
+        # Check if another tournament for the given year already exists (excluding the current tournament)
+        existing_tournament = db.tournaments.find_one({
+            "year": year,
+            "_id": {"$ne": ObjectId(_id)}  # Exclude the current tournament being updated
+        }, session=session)
+
+        if existing_tournament:
+            flash("A tournament for this year already exists!", "danger")
+            session.abort_transaction()
+            return redirect(url_for('adminRoutes.tournaments_management'))
+
+        # Prepare the updated tournament data
+        tournament_data = {
+            "year": year,
+            "host_country": request.form.get('hostCountry'),
+            "winning_team": {**winner_team, "_id": winner_team_id},
+            "runner_up_team": {**runner_up_team, "_id": runner_up_team_id},
+            "matches_played": int(request.form.get('matchesPlayed'))
+        }
+
+        # Update the tournament within the transaction
+        db.tournaments.update_one({"_id": ObjectId(_id)}, {"$set": tournament_data}, session=session)
+
+        # Commit the transaction
+        session.commit_transaction()
+        flash("Tournament updated successfully!", 'success')
+
+    except errors.DuplicateKeyError:
+        # Handle duplicate entry due to unique index
+        session.abort_transaction()
+        flash("A tournament for this year already exists!", "danger")
+    except errors.PyMongoError as e:
+        # Handle other MongoDB errors
+        session.abort_transaction()
+        flash(f"Error updating tournament: {str(e)}", "danger")
+    finally:
+        # End the session
+        session.end_session()
 
     return redirect(url_for('adminRoutes.tournaments_management'))
 

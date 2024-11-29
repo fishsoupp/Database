@@ -28,6 +28,7 @@ def decimal_default(obj):
     raise TypeError
 
 from admin.routes import adminRoutes
+
 app.register_blueprint(adminRoutes, url_prefix="/admin")
 
 @app.route('/')
