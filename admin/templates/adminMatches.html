@@ -157,7 +157,7 @@
               <label for="homeTeamEdit-{{ match._id }}" class="form-label">Home Team</label>
               <select class="form-control" id="homeTeamEdit-{{ match._id }}" name="homeTeam">
                 {% for team in teams %}
-                <option value="{{ team._id }}" {% if match.home_team.team_id == team._id %}selected{% endif %}>{{ team.team_name }}</option>
+                <option value="{{ team._id }}" {% if match.home_team._id == team._id %}selected{% endif %}>{{ team.team_name }}</option>
                 {% endfor %}
               </select>
             </div>
@@ -165,7 +165,7 @@
               <label for="awayTeamEdit-{{ match._id }}" class="form-label">Away Team</label>
               <select class="form-control" id="awayTeamEdit-{{ match._id }}" name="awayTeam">
                 {% for team in teams %}
-                <option value="{{ team._id }}" {% if match.away_team.team_id == team._id %}selected{% endif %}>{{ team.team_name }}</option>
+                <option value="{{ team._id }}" {% if match.away_team._id == team._id %}selected{% endif %}>{{ team.team_name }}</option>
                 {% endfor %}
               </select>
             </div>
@@ -173,7 +173,7 @@
               <label for="stadiumEdit-{{ match._id }}" class="form-label">Stadium</label>
               <select class="form-control" id="stadiumEdit-{{ match._id }}" name="stadium">
                 {% for stadium in stadiums %}
-                <option value="{{ stadium._id }}" {% if match.stadium.stadium_id == stadium._id %}selected{% endif %}>{{ stadium.stadium_name }}</option>
+                <option value="{{ stadium._id }}" {% if match.stadium._id == stadium._id %}selected{% endif %}>{{ stadium.stadium_name }}</option>
                 {% endfor %}
               </select>
             </div>
@@ -193,7 +193,7 @@
               <label for="refereeEdit-{{ match._id }}" class="form-label">Referee</label>
               <select class="form-control" id="refereeEdit-{{ match._id }}" name="referee">
                 {% for referee in referees %}
-                <option value="{{ referee._id }}" {% if match.referee.referee_id == referee._id %}selected{% endif %}>{{ referee.referee_name }}</option>
+                <option value="{{ referee._id }}" {% if match.referee._id == referee._id %}selected{% endif %}>{{ referee.referee_name }}</option>
                 {% endfor %}
               </select>
             </div>

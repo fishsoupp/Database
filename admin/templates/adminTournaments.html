@@ -170,7 +170,7 @@
               <label for="runnerUpEdit" class="form-label">Runner-Up</label>
               <select class="form-control" id="runnerUpEdit-{{ tournament._id }}" name="runnerUp">
                 {% for team in teams %}
-                <option value="{{ team._id }}" {% if tournament.runner_up_team.team_id == team._id %}selected{% endif %}>{{ team.team_name }}</option>
+                <option value="{{ team._id }}" {% if tournament.runner_up_team._id == team._id %}selected{% endif %}>{{ team.team_name }}</option>
                 {% endfor %}
               <select>
             </div>
@@ -212,4 +212,3 @@
 {% endfor %}
 
 {% endblock %}
-

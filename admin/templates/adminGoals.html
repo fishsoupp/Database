@@ -123,7 +123,7 @@
               <label for="matchEdit-{{ goal._id }}" class="form-label">Match</label>
               <select class="form-control" id="matchEdit-{{ goal._id }}" name="match" required>
                 {% for match in matches %}
-                <option value="{{ match._id }}" {% if goal.match.match_id == match._id %}selected{% endif %}>{{ match.home_team.team_name }} vs {{ match.away_team.team_name }} - {{ match.tournament_year }}</option>
+                <option value="{{ match._id }}" {% if goal.match._id == match._id %}selected{% endif %}>{{ match.home_team.team_name }} vs {{ match.away_team.team_name }} - {{ match.tournament_year }}</option>
                 {% endfor %}
               </select>
             </div>

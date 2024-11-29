@@ -77,7 +77,7 @@
               <select class="form-control" id="team-{{ player._id }}" name="team" required>
                 {% for team in teams %}
                 <option value="{{ team._id }}" 
-                    {% if player.team.team_id == team._id %}selected{% endif %}>
+                    {% if player.team._id == team._id %}selected{% endif %}>
                   {{ team.team_name }}
                 </option>
 
