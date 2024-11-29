@@ -20,7 +20,8 @@ def adminLanding():
         flash("No tournaments found!", "danger")
         return render_template("adminLanding.html", teams=[], goals=[])
 
-    latest_tournament_id = latest_tournament["tournament_id"]
+    # Extract the tournament _id for the latest tournament
+    latest_tournament_id = latest_tournament["_id"]
 
     # Aggregation pipeline to calculate total goals for teams
     result = db.matches.aggregate([
@@ -140,19 +141,19 @@ def players_management(page):
     per_page = 30
     offset = (page - 1) * per_page
 
-    teams = list(db.teams.find({}, {"team_id": 1, "team_name": 1}))
+    teams = list(db.teams.find({}, {"_id": 1, "team_name": 1}))
     
     # Fetch players with embedded team details
     players = list(db.players.find(
         {},  
         {
-            "player_id": 1,
+            "_id": 1,
             "player_name": 1,
             "position": 1,
             "date_of_birth": 1,
             "caps": 1,
-            "team.team_id": 1,  
-            "team.team_name": 1 
+            "team.team_name": 1,  # Access team name from embedded team
+            "team._id": 1,  # Access team _id
         }
     ).skip(offset).limit(per_page))
 
@@ -172,27 +173,27 @@ def players_management(page):
 def add_player():
     if request.method == 'POST':
 
-        # Get the latest player_id and increment it by 1
-        latest_player = db.players.find_one(sort=[("player_id", -1)]) 
-        new_player_id = latest_player["player_id"] + 1 if latest_player else 1  
-        
-         # Fetch the selected team details
-        team_id = int(request.form.get('team'))
-        team_details = db.teams.find_one({"team_id": team_id})  
+        # Fetch the selected team details
+        team_oid = request.form.get('team')  # Fetch the team's ObjectId as a string
+        team_details = db.teams.find_one({"_id": ObjectId(team_oid)})  # Find team by ObjectId
+
+        if not team_details:
+            flash("Selected team not found!", "danger")
+            return redirect(url_for('adminRoutes.players_management'))
 
         # Prepare the new player data
         player = {
-            "player_id": new_player_id,  
             "player_name": request.form.get('playerName'),
             "team": { 
-                "team_id": team_details["team_id"],
+                "_id": team_details["_id"],  # Use ObjectId from the team
                 "team_name": team_details["team_name"],
-                "continent": team_details["continent"],  
-                "fifa_code": team_details["fifa_code"]      
+                "continent": team_details.get("continent", ""),  
+                "fifa_code": team_details.get("fifa_code", "")      
             },
             "position": request.form.get('position'),
             "date_of_birth": request.form.get('date_of_birth'),
-            "caps": int(request.form.get('caps'))
+            "caps": int(request.form.get('caps')),
+            "player_performance": []  # Initialize an empty performance array
         }
 
         try:
@@ -206,26 +207,29 @@ def add_player():
     return redirect(url_for('adminRoutes.players_management'))
 
 # Update Player
-@adminRoutes.route('/players/update/<string:player_id>', methods=['POST'])
-def update_player(player_id):
+@adminRoutes.route('/players/update/<string:_id>', methods=['POST'])
+def update_player(_id):
     if request.method == 'POST':
 
+        # Convert the player ObjectId
+        player_oid = ObjectId(_id)
+
         # Get the team details from the teams collection
-        team_id = int(request.form.get('team'))
-        team = db.teams.find_one({"team_id": team_id}, {"team_id": 1, "team_name": 1, "fifa_code": 1, "continent": 1})
+        team_oid = request.form.get('team')
+        team = db.teams.find_one({"_id": ObjectId(team_oid)}, {"_id": 1, "team_name": 1, "fifa_code": 1, "continent": 1})
 
         if not team:
-            flash(f"Team with ID {team_id} not found.", 'danger')
+            flash(f"Team with ID {team_oid} not found.", 'danger')
             return redirect(url_for('adminRoutes.players_management'))
 
         # Prepare the player data with embedded team details
         player_data = {
             "player_name": request.form.get('playerName'),
             "team": {
-                "team_id": team["team_id"],
+                "_id": team["_id"],  
                 "team_name": team["team_name"],
-                "fifa_code": team["fifa_code"],
-                "continent": team["continent"]
+                "fifa_code": team.get("fifa_code", ""),
+                "continent": team.get("continent", "")
             },
             "position": request.form.get('position'),
             "date_of_birth": request.form.get('dateOfBirth'),
@@ -233,18 +237,23 @@ def update_player(player_id):
         }
 
         try:
-            db.players.update_one({"player_id": int(player_id)}, {"$set": player_data})
+            # Update the player document
+            db.players.update_one({"_id": player_oid}, {"$set": player_data})
             flash(f"Player updated successfully!", 'success')
+
         except Exception as e:
             flash(f"Error updating player: {str(e)}", 'danger')
 
     return redirect(url_for('adminRoutes.players_management'))
 
 # Delete Player
-@adminRoutes.route('/players/delete/<string:player_id>', methods=['POST'])
-def delete_player(player_id):
+@adminRoutes.route('/players/delete/<string:_id>', methods=['POST'])
+def delete_player(_id):
     try:
-        db.players.delete_one({"player_id": int(player_id)})
+
+        player_oid = ObjectId(_id)
+
+        db.players.delete_one({"_id": player_oid})
         flash(f"Player deleted successfully!", 'success')
     except Exception as e:
         flash(f"Error deleting player: {str(e)}", 'danger')
@@ -265,7 +274,7 @@ def matches_management(page):
             "$lookup": {
                 "from": "tournaments",
                 "localField": "tournament_id",
-                "foreignField": "tournament_id",
+                "foreignField": "_id",
                 "as": "tournament_info"
             }
         },
@@ -274,9 +283,8 @@ def matches_management(page):
         # Project the required fields
         {
             "$project": {
-                "_id": 0,  # Exclude the default _id field
-                "match_id": 1,
-                "tournament_id": "$tournament_info.tournament_id",
+                "_id": 1, 
+                "tournament_id": "$tournament_info._id",
                 "tournament_year": "$tournament_info.year",  
                 "home_team": 1,  
                 "away_team": 1, 
@@ -294,10 +302,10 @@ def matches_management(page):
     matches = list(matches_cursor)  # Convert cursor to a list
 
     # These are the required list for dropdowns
-    teams = list(db.teams.find({}, {"team_id": 1, "team_name": 1}))
-    tournaments = list(db.tournaments.find({}, {"tournament_id": 1, "year": 1}))
-    stadiums = list(db.stadiums.find({}, {"stadium_id": 1, "stadium_name": 1}))
-    referees = list(db.referees.find({}, {"referee_id": 1, "referee_name": 1}))
+    teams = list(db.teams.find({}, {"_id": 1, "team_name": 1}))
+    tournaments = list(db.tournaments.find({}, {"_id": 1, "year": 1}))
+    stadiums = list(db.stadiums.find({}, {"_id": 1, "stadium_name": 1}))
+    referees = list(db.referees.find({}, {"_id": 1, "referee_name": 1}))
 
     total_matches = db.matches.count_documents({})
     total_pages = (total_matches // per_page) + (1 if total_matches % per_page > 0 else 0)
@@ -313,55 +321,52 @@ def matches_management(page):
 def add_match():
     if request.method == 'POST':
 
-        # Get the latest player_id and increment it by 1
-        latest_match = db.matches.find_one(sort=[("match_id", -1)]) 
-        new_match_id = latest_match["match_id"] + 1 if latest_match else 1  
+         # Fetch tournament details
+        tournament_id = request.form.get('tournament')
+        tournament = db.tournaments.find_one({"_id": ObjectId(tournament_id)}, {"_id": 1})
+        if not tournament:
+            flash('Tournament not found.', 'danger')
+            return redirect(url_for('adminRoutes.matches_management'))
 
         # Fetch referee details
-        referee_id = int(request.form.get('referee'))
-        referee = db.referees.find_one({"referee_id": referee_id}, {"_id": 0, "referee_id": 1, "referee_name": 1})
+        referee_id = request.form.get('referee')
+        referee = db.referees.find_one({"_id": ObjectId(referee_id)}, {"_id": 1, "referee_name": 1})
         if not referee:
             flash('Referee not found.', 'danger')
             return redirect(url_for('adminRoutes.matches_management'))
 
         # Fetch stadium details
-        stadium_id = int(request.form.get('stadium'))
-        stadium = db.stadiums.find_one({"stadium_id": stadium_id}, {"_id": 0, "stadium_id": 1, "stadium_name": 1, "city": 1})
+        stadium_id = request.form.get('stadium')
+        stadium = db.stadiums.find_one({"_id": ObjectId(stadium_id)}, {"_id": 1, "stadium_name": 1, "city": 1})
         if not stadium:
             flash('Stadium not found.', 'danger')
             return redirect(url_for('adminRoutes.matches_management'))
 
         # Fetch home team details
-        home_team_id = int(request.form.get('homeTeam'))
-        home_team = db.teams.find_one(
-            {"team_id": home_team_id},
-            {"_id": 0, "team_id": 1, "team_name": 1, "continent": 1, "fifa_code": 1}
-        )
+        home_team_id = request.form.get('homeTeam')
+        home_team = db.teams.find_one({"_id": ObjectId(home_team_id)}, {"_id": 1, "team_name": 1, "continent": 1, "fifa_code": 1})
         if not home_team:
             flash('Home team not found.', 'danger')
             return redirect(url_for('adminRoutes.matches_management'))
 
         # Fetch away team details
-        away_team_id = int(request.form.get('awayTeam'))
-        away_team = db.teams.find_one(
-            {"team_id": away_team_id},
-            {"_id": 0, "team_id": 1, "team_name": 1, "continent": 1, "fifa_code": 1}
-        )
+        away_team_id = request.form.get('awayTeam')
+        away_team = db.teams.find_one({"_id": ObjectId(away_team_id)}, {"_id": 1, "team_name": 1, "continent": 1, "fifa_code": 1})
         if not away_team:
             flash('Away team not found.', 'danger')
             return redirect(url_for('adminRoutes.matches_management'))
 
+
         # Prepare the match document
         match = {
-            "match_id": new_match_id,
-            "tournament_id": int(request.form.get('tournament')),
+            "tournament_id": tournament["_id"],
             "home_team": home_team, 
             "away_team": away_team, 
             "home_team_goal": int(request.form.get('home_team_goals')),
             "away_team_goal": int(request.form.get('away_team_goals')),
             "round": request.form.get('round'),
-            "referee": referee,     
-            "stadium": stadium      
+            "referee": referee,
+            "stadium": stadium
         }
 
         try:
@@ -375,58 +380,62 @@ def add_match():
     return redirect(url_for('adminRoutes.matches_management'))
 
 # Update Match
-@adminRoutes.route('/matches/update/<string:match_id>', methods=['POST'])
-def update_match(match_id):
+@adminRoutes.route('/matches/update/<string:_id>', methods=['POST'])
+def update_match(_id):
     if request.method == 'POST':
 
+        # Convert the match _id from string to ObjectId
+        match_oid = ObjectId(_id)
+
+        # Fetch tournament details
+        tournament_id = request.form.get('tournament')
+        tournament = db.tournaments.find_one({"_id": ObjectId(tournament_id)}, {"_id": 1})
+        if not tournament:
+            flash('Tournament not found.', 'danger')
+            return redirect(url_for('adminRoutes.matches_management'))
+
         # Fetch referee details
-        referee_id = int(request.form.get('referee'))
-        referee = db.referees.find_one({"referee_id": referee_id}, {"_id": 0, "referee_id": 1, "referee_name": 1})
+        referee_id = request.form.get('referee')
+        referee = db.referees.find_one({"_id": ObjectId(referee_id)}, {"_id": 1, "referee_name": 1})
         if not referee:
             flash('Referee not found.', 'danger')
             return redirect(url_for('adminRoutes.matches_management'))
 
         # Fetch stadium details
-        stadium_id = int(request.form.get('stadium'))
-        stadium = db.stadiums.find_one({"stadium_id": stadium_id}, {"_id": 0, "stadium_id": 1, "stadium_name": 1, "city": 1})
+        stadium_id = request.form.get('stadium')
+        stadium = db.stadiums.find_one({"_id": ObjectId(stadium_id)}, {"_id": 1, "stadium_name": 1, "city": 1})
         if not stadium:
             flash('Stadium not found.', 'danger')
             return redirect(url_for('adminRoutes.matches_management'))
 
         # Fetch home team details
-        home_team_id = int(request.form.get('homeTeam'))
-        home_team = db.teams.find_one(
-            {"team_id": home_team_id},
-            {"_id": 0, "team_id": 1, "team_name": 1, "continent": 1, "fifa_code": 1}
-        )
+        home_team_id = request.form.get('homeTeam')
+        home_team = db.teams.find_one({"_id": ObjectId(home_team_id)}, {"_id": 1, "team_name": 1, "continent": 1, "fifa_code": 1})
         if not home_team:
             flash('Home team not found.', 'danger')
             return redirect(url_for('adminRoutes.matches_management'))
 
         # Fetch away team details
-        away_team_id = int(request.form.get('awayTeam'))
-        away_team = db.teams.find_one(
-            {"team_id": away_team_id},
-            {"_id": 0, "team_id": 1, "team_name": 1, "continent": 1, "fifa_code": 1}
-        )
+        away_team_id = request.form.get('awayTeam')
+        away_team = db.teams.find_one({"_id": ObjectId(away_team_id)}, {"_id": 1, "team_name": 1, "continent": 1, "fifa_code": 1})
         if not away_team:
             flash('Away team not found.', 'danger')
             return redirect(url_for('adminRoutes.matches_management'))
 
-        # Prepare the match data with embedded details
+        # Prepare the updated match data
         match_data = {
-            "tournament_id": int(request.form.get('tournament')),
+            "tournament_id": tournament["_id"],
             "home_team": home_team,
-            "away_team": away_team,  
+            "away_team": away_team,
             "home_team_goal": int(request.form.get('home_team_goals')),
             "away_team_goal": int(request.form.get('away_team_goals')),
             "round": request.form.get('round'),
-            "referee": referee,    
-            "stadium": stadium     
+            "referee": referee,
+            "stadium": stadium
         }
 
         try:
-            db.matches.update_one({"match_id": int(match_id)}, {"$set": match_data})
+            db.matches.update_one({"_id": match_oid}, {"$set": match_data})
             flash(f"Match updated successfully!", 'success')
         except Exception as e:
             flash(f"Error updating match: {str(e)}", 'danger')
@@ -434,10 +443,12 @@ def update_match(match_id):
     return redirect(url_for('adminRoutes.matches_management'))
 
 # Delete Match
-@adminRoutes.route('/matches/delete/<string:match_id>', methods=['POST'])
-def delete_match(match_id):
+@adminRoutes.route('/matches/delete/<string:_id>', methods=['POST'])
+def delete_match(_id):
     try:
-        db.matches.delete_one({"match_id": int(match_id)})
+        match_oid = ObjectId(_id)
+
+        db.matches.delete_one({"_id": match_oid})
         flash(f"Match deleted successfully!", 'success')
     except Exception as e:
         flash(f"Error deleting match: {str(e)}", 'danger')
@@ -458,7 +469,7 @@ def goals_management(page):
             "$lookup": {
                 "from": "players",
                 "localField": "player_id",
-                "foreignField": "player_id",
+                "foreignField": "_id",
                 "as": "player_info"
             }
         },
@@ -466,7 +477,7 @@ def goals_management(page):
             "$lookup": {
                 "from": "matches",
                 "localField": "match_id",
-                "foreignField": "match_id",
+                "foreignField": "_id",
                 "as": "match_info"
             }
         },
@@ -476,8 +487,7 @@ def goals_management(page):
         # Project the required fields
         {
             "$project": {
-                "_id": 0,  # Exclude MongoDB's default _id
-                "goal_id": 1,
+                "_id": 1, 
                 "minute_scored": 1,
                 "is_penalty": 1,
                 "is_own_goal": 1,
@@ -490,8 +500,8 @@ def goals_management(page):
     ])
 
     goals = list(goals_cursor)
-    players = list(db.players.find({}, {"player_id": 1, "player_name": 1}))
-    matches = list(db.matches.find({}, {"match_id": 1, "home_team.team_name": 1, "away_team.team_name": 1}))
+    players = list(db.players.find({}, {"_id": 1, "player_name": 1}))
+    matches = list(db.matches.find({}, {"_id": 1, "home_team.team_name": 1, "away_team.team_name": 1}))
 
     total_goals = db.goals.count_documents({})
     total_pages = (total_goals // per_page) + (1 if total_goals % per_page > 0 else 0)
@@ -507,36 +517,26 @@ def goals_management(page):
 def add_goal():
     if request.method == 'POST':
 
-        # Get the latest goal_id and increment it by 1
-        latest_goal = db.goals.find_one(sort=[("goal_id", -1)]) 
-        new_goal_id = latest_goal["goal_id"] + 1 if latest_goal else 1  
-
         # Fetch match details
-        match_id = int(request.form.get('match'))
-        match = db.matches.find_one(
-            {"match_id": match_id},
-            {"_id": 0, "match_id": 1, "home_team": 1, "away_team": 1}
-        )
+        match_id = request.form.get('match')
+        match = db.matches.find_one({"_id": ObjectId(match_id)}, {"_id": 1})
         if not match:
             flash('Match not found.', 'danger')
             return redirect(url_for('adminRoutes.goals_management'))
 
         # Fetch player details
-        player_id = int(request.form.get('player'))
-        player = db.players.find_one(
-            {"player_id": player_id},
-            {"_id": 0, "player_id": 1, "player_name": 1}
-        )
+        player_id = request.form.get('player')
+        player = db.players.find_one({"_id": ObjectId(player_id)}, {"_id": 1})
         if not player:
             flash('Player not found.', 'danger')
             return redirect(url_for('adminRoutes.goals_management'))
 
+
         # Prepare the goal document
         goal = {
-            "goal_id": new_goal_id,
-            "player_id": player_id, 
-            "match_id": match_id, 
-            "minute_scored": int(request.form.get('minute')),
+            "player_id": ObjectId(player_id),
+            "match_id": ObjectId(match_id),
+            "minute_scored": request.form.get('minute') + "'",
             "is_penalty": 'penalty' in request.form,
             "is_own_goal": 'ownGoal' in request.form
         }
@@ -550,39 +550,36 @@ def add_goal():
         return redirect(url_for('adminRoutes.goals_management'))
 
 # Update Goal
-@adminRoutes.route('/goals/update/<string:goal_id>', methods=['POST'])
-def update_goal(goal_id):
-    # Fetch match details
-    match_id = int(request.form.get('match'))
-    match = db.matches.find_one(
-        {"match_id": match_id},
-        {"_id": 0, "match_id": 1, "home_team": 1, "away_team": 1}
-    )
+@adminRoutes.route('/goals/update/<string:_id>', methods=['POST'])
+def update_goal(_id):
+
+    goal_oid = ObjectId(_id)
+
+     # Fetch match details
+    match_id = request.form.get('match')
+    match = db.matches.find_one({"_id": ObjectId(match_id)}, {"_id": 1})
     if not match:
         flash('Match not found.', 'danger')
         return redirect(url_for('adminRoutes.goals_management'))
 
     # Fetch player details
-    player_id = int(request.form.get('player'))
-    player = db.players.find_one(
-        {"player_id": player_id},
-        {"_id": 0, "player_id": 1, "player_name": 1}
-    )
+    player_id = request.form.get('player')
+    player = db.players.find_one({"_id": ObjectId(player_id)}, {"_id": 1})
     if not player:
         flash('Player not found.', 'danger')
         return redirect(url_for('adminRoutes.goals_management'))
 
     # Prepare the updated goal data
     goal_data = {
-        "player_id": player_id, 
-        "match_id": match_id,  
-        "minute_scored": int(request.form.get('minute')),
+        "player_id": ObjectId(player_id),
+        "match_id": ObjectId(match_id),
+        "minute_scored": request.form.get('minute') + "'",
         "is_penalty": 'penalty' in request.form,
         "is_own_goal": 'ownGoal' in request.form
     }
 
     try:
-        db.goals.update_one({"goal_id": int(goal_id)}, {"$set": goal_data})
+        db.goals.update_one({"_id": goal_oid}, {"$set": goal_data})
         flash(f"Goal updated successfully!", 'success')
     except Exception as e:
         flash(f"Error updating goal: {str(e)}", 'danger')
@@ -590,10 +587,13 @@ def update_goal(goal_id):
     return redirect(url_for('adminRoutes.goals_management'))
 
 # Delete Goal
-@adminRoutes.route('/goals/delete/<string:goal_id>', methods=['POST'])
-def delete_goal(goal_id):
+@adminRoutes.route('/goals/delete/<string:_id>', methods=['POST'])
+def delete_goal(_id):
     try:
-        db.goals.delete_one({"goal_id": int(goal_id)})
+
+        goal_oid = ObjectId(_id)
+
+        db.goals.delete_one({"_id": goal_oid})
         flash(f"Goal deleted successfully!", 'success')
     except Exception as e:
         flash(f"Error deleting goal: {str(e)}", 'danger')
@@ -610,8 +610,7 @@ def tournaments_management(page):
 
     # Fetch tournaments directly with embedded team and scorer details
     tournaments = list(db.tournaments.find({}, {
-        "_id": 0,  # Exclude the default _id field
-        "tournament_id": 1,
+        "_id": 1,  
         "year": 1,
         "host_country": 1,
         "matches_played": 1,
@@ -620,7 +619,7 @@ def tournaments_management(page):
         "scorers": 1
     }).skip(offset).limit(per_page))
 
-    teams = list(db.teams.find({}, {"team_id": 1, "team_name": 1}))
+    teams = list(db.teams.find({}, {"_id": 1, "team_name": 1}))
 
     total_tournaments = db.tournaments.count_documents({})
     total_pages = (total_tournaments // per_page) + (1 if total_tournaments % per_page > 0 else 0)
@@ -637,8 +636,11 @@ def add_tournament():
     if request.method == 'POST':
 
         # Fetch the winner and runner-up team details from the database
-        winner_team = db.teams.find_one({"team_id": int(request.form.get('winner'))}, {"_id": 0})
-        runner_up_team = db.teams.find_one({"team_id": int(request.form.get('runnerUp'))}, {"_id": 0})
+        winner_team_id = ObjectId(request.form.get('winner'))
+        winner_team = db.teams.find_one({"_id": winner_team_id}, {"team_name": 1, "continent": 1, "fifa_code": 1})
+
+        runner_up_team_id = ObjectId(request.form.get('runnerUp'))
+        runner_up_team = db.teams.find_one({"_id": runner_up_team_id}, {"team_name": 1, "continent": 1, "fifa_code": 1})
         
         if not winner_team or not runner_up_team:
             flash("Invalid team selection for winner or runner-up.", 'danger')
@@ -646,13 +648,12 @@ def add_tournament():
 
         # Create tournament document
         tournament = {
-            "tournament_id": db.tournaments.count_documents({}) + 1,  
             "year": int(request.form.get('year')),
             "host_country": request.form.get('hostCountry'),
-            "winning_team": winner_team,
-            "runner_up_team": runner_up_team,
+            "winning_team": {**winner_team, "_id": winner_team_id},
+            "runner_up_team": {**runner_up_team, "_id": runner_up_team_id},
             "matches_played": int(request.form.get('matchesPlayed')),
-            "scorers": [] 
+            "scorers": []  # Default empty list for scorers
         }
 
         try:
@@ -664,12 +665,15 @@ def add_tournament():
         return redirect(url_for('adminRoutes.tournaments_management'))
 
 # Update Tournament
-@adminRoutes.route('/tournaments/update/<string:tournament_id>', methods=['POST'])
-def update_tournament(tournament_id):
+@adminRoutes.route('/tournaments/update/<string:_id>', methods=['POST'])
+def update_tournament(_id):
     
     # Fetch the updated winner and runner-up team details from the database
-    winner_team = db.teams.find_one({"team_id": int(request.form.get('winner'))}, {"_id": 0})
-    runner_up_team = db.teams.find_one({"team_id": int(request.form.get('runnerUp'))}, {"_id": 0})
+    winner_team_id = ObjectId(request.form.get('winner'))
+    winner_team = db.teams.find_one({"_id": winner_team_id}, {"team_name": 1, "continent": 1, "fifa_code": 1})
+
+    runner_up_team_id = ObjectId(request.form.get('runnerUp'))
+    runner_up_team = db.teams.find_one({"_id": runner_up_team_id}, {"team_name": 1, "continent": 1, "fifa_code": 1})
 
     if not winner_team or not runner_up_team:
         flash("Invalid team selection for winner or runner-up.", 'danger')
@@ -679,13 +683,13 @@ def update_tournament(tournament_id):
     tournament_data = {
         "year": int(request.form.get('year')),
         "host_country": request.form.get('hostCountry'),
-        "winning_team": winner_team,
-        "runner_up_team": runner_up_team,
+        "winning_team": {**winner_team, "_id": winner_team_id},
+        "runner_up_team": {**runner_up_team, "_id": runner_up_team_id},
         "matches_played": int(request.form.get('matchesPlayed'))
     }
 
     try:
-        db.tournaments.update_one({"tournament_id": int(tournament_id)}, {"$set": tournament_data})
+        db.tournaments.update_one({"_id": ObjectId(_id)}, {"$set": tournament_data})
         flash(f"Tournament updated successfully!", 'success')
     except Exception as e:
         flash(f"Error updating tournament: {str(e)}", 'danger')
@@ -693,10 +697,10 @@ def update_tournament(tournament_id):
     return redirect(url_for('adminRoutes.tournaments_management'))
 
 # Delete Tournament
-@adminRoutes.route('/tournaments/delete/<string:tournament_id>', methods=['POST'])
-def delete_tournament(tournament_id):
+@adminRoutes.route('/tournaments/delete/<string:_id>', methods=['POST'])
+def delete_tournament(_id):
     try:
-        db.tournaments.delete_one({"tournament_id": int(tournament_id)})
+        db.tournaments.delete_one({"_id": ObjectId(_id)})
         flash(f"Tournament deleted successfully!", 'success')
     except Exception as e:
         flash(f"Error deleting tournament: {str(e)}", 'danger')

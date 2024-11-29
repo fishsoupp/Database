@@ -34,12 +34,12 @@
       <td>{{ "Yes" if goal.is_own_goal else "No" }}</td>
       <td>
         <button class="btn btn-sm" style="background-color: transparent; border: 1px solid transparent;"
-        data-bs-toggle="modal" data-bs-target="#editGoalModal-{{ goal.goal_id }}">
+        data-bs-toggle="modal" data-bs-target="#editGoalModal-{{ goal._id }}">
           <i class="fas fa-pencil" style="color: #FFC107;"></i>
         </button>
         
         <button class="btn btn-sm" style="background-color: transparent; border: 1px solid transparent;"
-        data-bs-toggle="modal" data-bs-target="#deleteGoalModal-{{ goal.goal_id }}">
+        data-bs-toggle="modal" data-bs-target="#deleteGoalModal-{{ goal._id }}">
           <i class="fas fa-trash" style="color: #dc3545;"></i>
         </button>
         
@@ -65,7 +65,7 @@
             <select class="form-control" id="player" name="player" required>
               <option value="" disabled selected>Select a player...</option>
               {% for player in players %}
-              <option value="{{ player.player_id }}">{{ player.player_name }}</option>
+              <option value="{{ player._id }}">{{ player.player_name }}</option>
               {% endfor %}
             </select>
           </div>
@@ -74,7 +74,7 @@
             <select class="form-control" id="match" name="match" required>
               <option value="" disabled selected>Select a match...</option>
               {% for match in matches %}
-              <option value="{{ match.match_id }}">{{ match.home_team.team_name }} vs {{ match.away_team.team_name }}</option>
+              <option value="{{ match._id }}">{{ match.home_team.team_name }} vs {{ match.away_team.team_name }}</option>
               {% endfor %}
             </select>
           </div>
@@ -102,7 +102,7 @@
 
 {% for goal in goals %}
 <!-- Edit Goal Modals -->
-  <div class="modal fade" id="editGoalModal-{{ goal.goal_id }}" tabindex="-1">
+  <div class="modal fade" id="editGoalModal-{{ goal._id }}" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -110,35 +110,35 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <form action="{{ url_for('adminRoutes.update_goal', goal_id=goal.goal_id) }}" method="post">
+          <form action="{{ url_for('adminRoutes.update_goal', _id=goal._id) }}" method="post">
             <div class="mb-3">
-              <label for="playerEdit-{{ goal.goal_id }}" class="form-label">Player</label>
-              <select class="form-control" id="playerEdit-{{ goal.goal_id }}" name="player" required>
+              <label for="playerEdit-{{ goal._id }}" class="form-label">Player</label>
+              <select class="form-control" id="playerEdit-{{ goal._id }}" name="player" required>
                 {% for player in players %}
-                <option value="{{ player.player_id }}" {% if goal.player.player_id == player.player_id %}selected{% endif %}>{{ player.player_name }}</option>
+                <option value="{{ player._id }}" {% if goal.player._id == player._id %}selected{% endif %}>{{ player.player_name }}</option>
                 {% endfor %}
               </select>
             </div>
             <div class="mb-3">
-              <label for="matchEdit-{{ goal.goal_id }}" class="form-label">Match</label>
-              <select class="form-control" id="matchEdit-{{ goal.goal_id }}" name="match" required>
+              <label for="matchEdit-{{ goal._id }}" class="form-label">Match</label>
+              <select class="form-control" id="matchEdit-{{ goal._id }}" name="match" required>
                 {% for match in matches %}
-                <option value="{{ match.match_id }}" {% if goal.match.match_id == match.match_id %}selected{% endif %}>{{ match.home_team.team_name }} vs {{ match.away_team.team_name }} - {{ match.tournament_year }}</option>
+                <option value="{{ match._id }}" {% if goal.match.match_id == match._id %}selected{% endif %}>{{ match.home_team.team_name }} vs {{ match.away_team.team_name }} - {{ match.tournament_year }}</option>
                 {% endfor %}
               </select>
             </div>
             <div class="mb-3">
-              <label for="minuteEdit-{{ goal.goal_id }}" class="form-label">Minute Scored</label>
-              <input type="number" class="form-control" id="minuteEdit-{{ goal.goal_id }}" name="minute" 
+              <label for="minuteEdit-{{ goal._id }}" class="form-label">Minute Scored</label>
+              <input type="number" class="form-control" id="minuteEdit-{{ goal._id }}" name="minute" 
                     value="{{ goal.minute_scored | int }}" min="1" max="120" required>
             </div>
             <div class="mb-3 form-check">
-              <input type="checkbox" class="form-check-input" id="penaltyEdit-{{ goal.goal_id }}" name="penalty" {% if goal.is_penalty %}checked{% endif %}>
-              <label for="penaltyEdit-{{ goal.goal_id }}" class="form-check-label">Penalty</label>
+              <input type="checkbox" class="form-check-input" id="penaltyEdit-{{ goal._id }}" name="penalty" {% if goal.is_penalty %}checked{% endif %}>
+              <label for="penaltyEdit-{{ goal._id }}" class="form-check-label">Penalty</label>
             </div>
             <div class="mb-3 form-check">
-              <input type="checkbox" class="form-check-input" id="ownGoalEdit-{{ goal.goal_id }}" name="ownGoal" {% if goal.is_own_goal %}checked{% endif %}>
-              <label for="ownGoalEdit-{{ goal.goal_id }}" class="form-check-label">Own Goal</label>
+              <input type="checkbox" class="form-check-input" id="ownGoalEdit-{{ goal._id }}" name="ownGoal" {% if goal.is_own_goal %}checked{% endif %}>
+              <label for="ownGoalEdit-{{ goal._id }}" class="form-check-label">Own Goal</label>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -151,7 +151,7 @@
   </div>
 
   <!-- Delete Goal Modal -->
-  <div class="modal fade" id="deleteGoalModal-{{ goal.goal_id }}" tabindex="-1">
+  <div class="modal fade" id="deleteGoalModal-{{ goal._id }}" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -162,7 +162,7 @@
           Are you sure you want to delete the goal by {{ goal.player.player_name }} in the match {{ goal.match.home_team.team_name }} vs {{ goal.match.away_team.team_name }}?
         </div>
         <div class="modal-footer">
-          <form action="{{ url_for('adminRoutes.delete_goal', goal_id=goal.goal_id) }}" method="POST">
+          <form action="{{ url_for('adminRoutes.delete_goal', _id=goal._id) }}" method="POST">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             <button type="submit" class="btn btn-danger">Delete</button>
           </form>

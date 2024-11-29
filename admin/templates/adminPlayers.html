@@ -36,11 +36,11 @@
       <td>{{ player.caps }}</td>
       <td>
         <button class="btn btn-sm" style="background-color: transparent; border: 1px solid transparent;"
-          data-bs-toggle="modal" data-bs-target="#editPlayerModal-{{ player.player_id}}">
+          data-bs-toggle="modal" data-bs-target="#editPlayerModal-{{ player._id}}">
           <i class="fas fa-pencil" style="color: #FFC107;"></i>
         </button>
         <button class="btn btn-sm" style="background-color: transparent; border: 1px solid transparent;"
-          data-bs-toggle="modal" data-bs-target="#deletePlayerModal-{{ player.player_id}}">
+          data-bs-toggle="modal" data-bs-target="#deletePlayerModal-{{ player._id}}">
           <i class="fas fa-trash" style="color: #dc3545;"></i>
         </button>
       </td>
@@ -54,30 +54,30 @@
 {% for player in players %}
 
   <!-- Edit Player Modal -->
-  <div class="modal fade" id="editPlayerModal-{{ player.player_id }}" tabindex="-1" aria-labelledby="editPlayerLabel-{{ player.player_id }}" aria-hidden="true">
+  <div class="modal fade" id="editPlayerModal-{{ player._id }}" tabindex="-1" aria-labelledby="editPlayerLabel-{{ player._id }}" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="editPlayerLabel-{{ player.player_id }}">
+          <h5 class="modal-title" id="editPlayerLabel-{{ player._id }}">
             Edit Player
           </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <form action="{{ url_for('adminRoutes.update_player', player_id=player.player_id) }}" method="post">
+          <form action="{{ url_for('adminRoutes.update_player', _id=player._id) }}" method="post">
             <!-- Player Name -->
             <div class="mb-3">
-              <label for="playerName-{{ player.player_id }}" class="form-label">Player Name</label>
-              <input type="text" class="form-control" id="playerName-{{ player.player_id }}" name="playerName" value="{{ player.player_name }}" placeholder="Enter player name" required>
+              <label for="playerName-{{ player._id }}" class="form-label">Player Name</label>
+              <input type="text" class="form-control" id="playerName-{{ player._id }}" name="playerName" value="{{ player.player_name }}" placeholder="Enter player name" required>
             </div>
 
             <!-- Team -->
             <div class="mb-3">
-              <label for="team-{{ player.player_id }}" class="form-label">Team</label>
-              <select class="form-control" id="team-{{ player.player_id }}" name="team" required>
+              <label for="team-{{ player._id }}" class="form-label">Team</label>
+              <select class="form-control" id="team-{{ player._id }}" name="team" required>
                 {% for team in teams %}
-                <option value="{{ team.team_id }}" 
-                    {% if player.team.team_id == team.team_id %}selected{% endif %}>
+                <option value="{{ team._id }}" 
+                    {% if player.team.team_id == team._id %}selected{% endif %}>
                   {{ team.team_name }}
                 </option>
 
@@ -87,20 +87,20 @@
 
             <!-- Position -->
             <div class="mb-3">
-              <label for="position-{{ player.player_id }}" class="form-label">Position</label>
-              <input type="text" class="form-control" id="position-{{ player.player_id }}" name="position" value="{{ player.position }}" placeholder="Enter position" required>
+              <label for="position-{{ player._id }}" class="form-label">Position</label>
+              <input type="text" class="form-control" id="position-{{ player._id }}" name="position" value="{{ player.position }}" placeholder="Enter position" required>
             </div>
 
             <!-- Date of Birth -->
             <div class="mb-3">
-              <label for="dateOfBirth-{{ player.player_id }}" class="form-label">Date of Birth</label>
-              <input type="date" class="form-control" id="dateOfBirth-{{ player.player_id }}" name="dateOfBirth" value="{{ player.date_of_birth }}" required>
+              <label for="dateOfBirth-{{ player._id }}" class="form-label">Date of Birth</label>
+              <input type="date" class="form-control" id="dateOfBirth-{{ player._id }}" name="dateOfBirth" value="{{ player.date_of_birth }}" required>
             </div>
 
             <!-- Caps -->
             <div class="mb-3">
-              <label for="caps-{{ player.player_id }}" class="form-label">Caps</label>
-              <input type="number" class="form-control" id="caps-{{ player.player_id }}" name="caps" value="{{ player.caps }}" placeholder="Enter caps" required>
+              <label for="caps-{{ player._id }}" class="form-label">Caps</label>
+              <input type="number" class="form-control" id="caps-{{ player._id }}" name="caps" value="{{ player.caps }}" placeholder="Enter caps" required>
             </div>
 
             <!-- Submit -->
@@ -116,7 +116,7 @@
 
 
 <!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deletePlayerModal-{{ player.player_id }}" tabindex="-1" aria-labelledby="deletePlayerLabel"
+<div class="modal fade" id="deletePlayerModal-{{ player._id }}" tabindex="-1" aria-labelledby="deletePlayerLabel"
   aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -129,7 +129,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <form action="{{ url_for('adminRoutes.delete_player', player_id=player.player_id) }}" method="POST">
+        <form action="{{ url_for('adminRoutes.delete_player', _id=player._id) }}" method="POST">
           <button type="submit" class="btn btn-danger">Delete</button>
         </form>
       </div>
@@ -200,7 +200,7 @@
             <select class="form-control" id="team" name="team" required>
               <option value="" disabled selected>Select a team...</option>
               {% for team in teams %}
-              <option value="{{ team.team_id }}">{{ team.team_name }}</option>
+              <option value="{{ team._id }}">{{ team.team_name }}</option>
               {% endfor %}
             </select>
           </div>
