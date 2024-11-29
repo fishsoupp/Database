@@ -5,18 +5,71 @@
     <h3 class="mt-4 mb-4">Past FIFA World Cup Matches</h3>
 
     <!-- Search bar -->
-    <div class="mb-4">
-        <form method="GET" action="{{ url_for('matches') }}">
-            <div class="input-group">
-                <input type="text" class="form-control" name="q" placeholder="Search by team or venue" value="{{ search_query }}">
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="submit">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </div>
+<div class="mb-4">
+    <form method="GET" action="{{ url_for('matches') }}" class="input-group">
+        <input type="text" name="q" class="form-control" placeholder="Search by team or venue" value="{{ search_query }}">
+        <button class="btn btn-outline-secondary" type="submit">
+            <i class="fas fa-search"></i>
+        </button>
+        <!-- Filter Button -->
+        <button type="button" class="btn btn-outline-secondary input-group-append" data-bs-toggle="modal" data-bs-target="#filterModal">
+            <i class="fas fa-filter"></i> Filters
+        </button>
+    </form>
+</div>
+
+
+    <!-- Filter Modal -->
+<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="filterModalLabel">Advanced Filters</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-        </form>
+            <div class="modal-body">
+                <form method="GET" action="{{ url_for('matches') }}">
+                    <!-- Filter by Round -->
+                    <div class="mb-3">
+                        <label for="round" class="form-label">Round</label>
+                        <select class="form-select" id="round" name="round">
+                            <option value="">All Rounds</option>
+                            <option value="group stage" {% if round == 'group stage' %}selected{% endif %}>Group Stage</option>
+                            <option value="round of 16" {% if round == 'round of 16' %}selected{% endif %}>Quarterfinals</option>
+                            <option value="semi-finals" {% if round == 'semi-finals' %}selected{% endif %}>Semifinals</option>
+                            <option value="final" {% if round == 'final' %}selected{% endif %}>Final</option>
+                        </select>
+                    </div>
+
+                    <!-- Filter by Home or Away Team -->
+                    <div class="mb-3">
+                        <label for="teamId" class="form-label">Select Team</label>
+                        <select class="form-select" id="teamId" name="team_id">
+                            <option value="">All Teams</option>
+                            {% for team in teams %}
+                            <option value="{{ team._id }}" {% if team_id == team._id %}selected{% endif %}>
+                                {{ team.team_name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Filter by Venue -->
+                    <div class="mb-3">
+                        <label for="venue" class="form-label">Venue</label>
+                        <input type="text" class="form-control" id="venue" name="venue" placeholder="Enter venue" value="{{ venue or '' }}">
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
+</div>
+
 
     <!-- Display Matches -->
     <table class="table table-striped table-hover table-bordered">
@@ -46,21 +99,30 @@
     <nav aria-label="Page navigation" class="mt-5">
         <ul class="pagination justify-content-center">
             {% if page > 1 %}
-            <li class="page-item"><a class="page-link" href="{{ url_for('matches', page=1) }}">First</a></li>
-            <li class="page-item"><a class="page-link" href="{{ url_for('matches', page=page-1) }}">Previous</a></li>
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('matches', page=1, q=search_query, team_id=team_id, round=round, venue=venue) }}">First</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('matches', page=page-1, q=search_query, team_id=team_id, round=round, venue=venue) }}">Previous</a>
+            </li>
             {% endif %}
-
+    
             {% for i in range(start_page, end_page + 1) %}
             <li class="page-item {% if page == i %}active{% endif %}">
-                <a class="page-link" href="{{ url_for('matches', page=i) }}">{{ i }}</a>
+                <a class="page-link" href="{{ url_for('matches', page=i, q=search_query, team_id=team_id, round=round, venue=venue) }}">{{ i }}</a>
             </li>
             {% endfor %}
-
+    
             {% if page < total_pages %}
-            <li class="page-item"><a class="page-link" href="{{ url_for('matches', page=page+1) }}">Next</a></li>
-            <li class="page-item"><a class="page-link" href="{{ url_for('matches', page=total_pages) }}">Last</a></li>
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('matches', page=page+1, q=search_query, team_id=team_id, round=round, venue=venue) }}">Next</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('matches', page=total_pages, q=search_query, team_id=team_id, round=round, venue=venue) }}">Last</a>
+            </li>
             {% endif %}
         </ul>
     </nav>
+    
 </div>
 {% endblock %}
