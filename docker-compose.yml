@@ -1,0 +1,16 @@
+version: '3.9'
+
+services:
+  flask-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flask-app
+    ports:
+      - "5000:5000"
+    env_file: .env
+    environment:
+      MONGO_URI: ${MONGODB_URI}
+      
+    volumes:
+      - .:/app
