@@ -1,0 +1,20 @@
+# fly.toml app configuration file generated for database-winter-dream-8186
+app = "database-winter-dream-8186"
+primary_region = "yul"  # Montreal (closest region for you)
+
+[build]
+
+[http_service]
+  internal_port = 5000  # Matches your app's port
+  force_https = true    # Ensures HTTPS traffic
+  auto_stop_machines = "stop"  # Stops machines when idle to save costs
+  auto_start_machines = true   # Automatically restarts when needed
+  min_machines_running = 0     # Set to 0 for free tier (no always-on VMs)
+  processes = ["app"]          # Defines your app's process for Fly.io
+
+[resources]
+  cpu = "shared-cpu-1x"  # Free tier machine
+  memory = 256           # Free tier memory limit
+
+[[vm]]
+  size = "shared-cpu-1x"  # Matches free tier configuration
