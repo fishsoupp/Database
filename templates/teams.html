@@ -33,47 +33,36 @@
     </div>
 
     <!-- Filter Modal -->
-    <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="filterModalLabel">Advanced Filters</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="filterForm">
-                        <!-- Filter by Number of Matches Played -->
-                        <div class="mb-3">
-                            <label for="matchesPlayed" class="form-label">Minimum Number of Matches Played</label>
-                            <input type="number" class="form-control" id="matchesPlayed" name="matches_played" min="0" placeholder="Enter minimum matches" value="{{ matches_played or '' }}">
-                        </div>
-    
-                        <!-- Filter by Number of Player Caps -->
-                        <div class="mb-3">
-                            <label for="playerCaps" class="form-label">Minimum Number of Caps for Players</label>
-                            <input type="number" class="form-control" id="playerCaps" name="player_caps" min="0" placeholder="Enter minimum caps" value="{{ player_caps or '' }}">
-                        </div>
-    
-                        <!-- Filter by Range of Matches (for Union query) -->
-                        <div class="mb-3">
-                            <label for="matchRange" class="form-label">Range of Matches Played</label>
-                            <div class="input-group">
-                                <input type="number" class="form-control" id="minMatches" name="min_matches" min="0" placeholder="Min Matches" value="{{ min_matches or '' }}">
-                                <span class="input-group-text">to</span>
-                                <input type="number" class="form-control" id="maxMatches" name="max_matches" min="0" placeholder="Max Matches" value="{{ max_matches or '' }}">
-                            </div>
-                        </div>
-    
-                        <!-- Apply and Close Buttons -->
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary">Apply Filters</button>
-                        </div>
-                    </form>
-                </div>
+<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="filterModalLabel">Advanced Filters</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="GET" action="{{ url_for('teams') }}">
+                    <!-- Minimum Matches -->
+                    <div class="mb-3">
+                        <label for="minMatches" class="form-label">Minimum Matches Played</label>
+                        <input type="number" class="form-control" id="minMatches" name="min_matches" value="{{ min_matches or '' }}" placeholder="Enter minimum matches">
+                    </div>
+                    <!-- Maximum Matches -->
+                    <div class="mb-3">
+                        <label for="maxMatches" class="form-label">Maximum Matches Played</label>
+                        <input type="number" class="form-control" id="maxMatches" name="max_matches" value="{{ max_matches or '' }}" placeholder="Enter maximum matches">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
+</div>
+
+
     
 
     <!-- Team cards and modals -->
@@ -114,47 +103,60 @@
     </div>
 
     <!-- Pagination -->
-    <nav aria-label="Page navigation" class="mt-5">
-        <ul class="pagination justify-content-center">
-            {% if page > 1 %}
-            <li class="page-item">
-                <a class="page-link" href="{{ url_for('teams', page=1) }}">First</a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="{{ url_for('teams', page=page-1) }}">Previous</a>
-            </li>
-            {% endif %}
-    
-            {% if start_page > 1 %}
-            <li class="page-item">
-                <a class="page-link" href="{{ url_for('teams', page=1) }}">1</a>
-            </li>
-            <li class="page-item disabled"><span class="page-link">...</span></li>
-            {% endif %}
-    
-            {% for i in range(start_page, end_page + 1) %}
-            <li class="page-item {% if page == i %}active{% endif %}">
-                <a class="page-link" href="{{ url_for('teams', page=i) }}">{{ i }}</a>
-            </li>
-            {% endfor %}
-    
-            {% if end_page < total_pages %}
-            <li class="page-item disabled"><span class="page-link">...</span></li>
-            <li class="page-item">
-                <a class="page-link" href="{{ url_for('teams', page=total_pages) }}">{{ total_pages }}</a>
-            </li>
-            {% endif %}
-    
-            {% if page < total_pages %}
-            <li class="page-item">
-                <a class="page-link" href="{{ url_for('teams', page=page+1) }}">Next</a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="{{ url_for('teams', page=total_pages) }}">Last</a>
-            </li>
-            {% endif %}
-        </ul>
-    </nav>
+<nav aria-label="Page navigation" class="mt-5">
+    <ul class="pagination justify-content-center">
+        {% if page > 1 %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('teams', page=1, q=search_query, min_matches=min_matches, max_matches=max_matches) }}">
+                First
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('teams', page=page-1, q=search_query, min_matches=min_matches, max_matches=max_matches) }}">
+                Previous
+            </a>
+        </li>
+        {% endif %}
+
+        {% if start_page > 1 %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('teams', page=1, q=search_query, min_matches=min_matches, max_matches=max_matches) }}">1</a>
+        </li>
+        <li class="page-item disabled"><span class="page-link">...</span></li>
+        {% endif %}
+
+        {% for i in range(start_page, end_page + 1) %}
+        <li class="page-item {% if page == i %}active{% endif %}">
+            <a class="page-link" href="{{ url_for('teams', page=i, q=search_query, min_matches=min_matches, max_matches=max_matches) }}">
+                {{ i }}
+            </a>
+        </li>
+        {% endfor %}
+
+        {% if end_page < total_pages %}
+        <li class="page-item disabled"><span class="page-link">...</span></li>
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('teams', page=total_pages, q=search_query, min_matches=min_matches, max_matches=max_matches) }}">
+                {{ total_pages }}
+            </a>
+        </li>
+        {% endif %}
+
+        {% if page < total_pages %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('teams', page=page+1, q=search_query, min_matches=min_matches, max_matches=max_matches) }}">
+                Next
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('teams', page=total_pages, q=search_query, min_matches=min_matches, max_matches=max_matches) }}">
+                Last
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+
 </div>
 {% endblock %}
 

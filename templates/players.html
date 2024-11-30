@@ -34,48 +34,53 @@
     </div>
     
     <!-- Filter Modal -->
-    <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="filterModalLabel">Advanced Filters</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="filterForm">
-                        <!-- Number of Caps with Range Input -->
-                        <div class="mb-3">
-                            <label for="caps" class="form-label">Minimum Caps: <span id="capsValue">0</span></label>
-                            <input type="range" class="form-range" id="caps" name="caps" min="0" max="50" value="0" oninput="document.getElementById('capsValue').textContent = this.value;">
-                        </div>
-                        <!-- Birth Year Selection with Dropdown -->
-                        <div class="mb-3">
-                            <label for="birthYear" class="form-label">Birth Year</label>
-                            <select class="form-control" id="birthYear" name="birth_year">
-                                <option value="">Select a Year...</option>
-                                {% for year in range(1900, 2024) %}
-                                <option value="{{ year }}">{{ year }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <!-- Country Selection -->
-                        <div class="mb-3">
-                            <label for="country" class="form-label">Select Multiple Countries:</label>
-                            <select class="form-control" id="country" name="countries[]" multiple>
-                                {% for country in countries %}
-                                <option value="{{ country['team_name'] }}">{{ country['team_name'] }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary" onclick="submitFilters()">Apply Filters</button>
-                        </div>   
-                    </form>
-                </div>
+<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="filterModalLabel">Advanced Filters</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="GET" action="{{ url_for('players') }}">
+                    <!-- Filter by Team -->
+                    <div class="mb-3">
+                        <label for="teamId" class="form-label">Select Team</label>
+                        <select class="form-select" id="teamId" name="team_id">
+                            <option value="">All Teams</option>
+                            {% for team in teams %}
+                            <option value="{{ team._id }}" {% if team_id == team._id %}selected{% endif %}>
+                                {{ team.team_name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+
+            
+
+                    <!-- Filter by Position -->
+                    <div class="mb-3">
+                        <label for="position" class="form-label">Position</label>
+                        <select class="form-select" id="position" name="position">
+                            <option value="">All Positions</option>
+                            <option value="goalkeeper" {% if position == 'goalkeeper' %}selected{% endif %}>Goalkeeper</option>
+                            <option value="defender" {% if position == 'defender' %}selected{% endif %}>Defender</option>
+                            <option value="midfielder" {% if position == 'midfielder' %}selected{% endif %}>Midfielder</option>
+                            <option value="forward" {% if position == 'forward' %}selected{% endif %}>Forward</option>
+                        </select>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
+</div>
+
 
 
     <!-- Player cards and modals -->
@@ -132,43 +137,44 @@
         <ul class="pagination justify-content-center pagination-container">
             {% if page > 1 %}
             <li class="page-item">
-                <a class="page-link" href="{{ url_for('players', page=1) }}">First</a>
+                <a class="page-link" href="{{ url_for('players', page=1, q=search_query, team_id=team_id, position=position) }}">First</a>
             </li>
             <li class="page-item">
-                <a class="page-link" href="{{ url_for('players', page=page-1) }}">Previous</a>
+                <a class="page-link" href="{{ url_for('players', page=page-1, q=search_query, team_id=team_id, position=position) }}">Previous</a>
             </li>
             {% endif %}
-
+    
             {% if start_page > 1 %}
             <li class="page-item">
-                <a class="page-link" href="{{ url_for('players', page=1) }}">1</a>
+                <a class="page-link" href="{{ url_for('players', page=1, q=search_query, team_id=team_id, position=position) }}">1</a>
             </li>
             <li class="page-item disabled"><span class="page-link">...</span></li>
             {% endif %}
-
+    
             {% for i in range(start_page, end_page + 1) %}
             <li class="page-item {% if page == i %}active{% endif %}">
-                <a class="page-link" href="{{ url_for('players', page=i) }}">{{ i }}</a>
+                <a class="page-link" href="{{ url_for('players', page=i, q=search_query, team_id=team_id, position=position) }}">{{ i }}</a>
             </li>
             {% endfor %}
-
+    
             {% if end_page < total_pages %}
             <li class="page-item disabled"><span class="page-link">...</span></li>
             <li class="page-item">
-                <a class="page-link" href="{{ url_for('players', page=total_pages) }}">{{ total_pages }}</a>
+                <a class="page-link" href="{{ url_for('players', page=total_pages, q=search_query, team_id=team_id, position=position) }}">{{ total_pages }}</a>
             </li>
             {% endif %}
-
+    
             {% if page < total_pages %}
             <li class="page-item">
-                <a class="page-link" href="{{ url_for('players', page=page+1) }}">Next</a>
+                <a class="page-link" href="{{ url_for('players', page=page+1, q=search_query, team_id=team_id, position=position) }}">Next</a>
             </li>
             <li class="page-item">
-                <a class="page-link" href="{{ url_for('players', page=total_pages) }}">Last</a>
+                <a class="page-link" href="{{ url_for('players', page=total_pages, q=search_query, team_id=team_id, position=position) }}">Last</a>
             </li>
             {% endif %}
         </ul>
     </nav>
+    
 
 
     
