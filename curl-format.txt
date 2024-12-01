@@ -1,0 +1,9 @@
+time_namelookup:  %{time_namelookup}
+
+time_connect:  %{time_connect}
+
+time_starttransfer:  %{time_starttransfer}
+
+----------
+total_time:  %{time_total}
+
