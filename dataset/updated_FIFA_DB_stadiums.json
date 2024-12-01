@@ -1,0 +1,193 @@
+{"_id":{"$oid":"67376e4bdad29ff7a579b9ab"},"stadium_name":"Estadio Pocitos","city":"Montevideo"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9ac"},"stadium_name":"Estadio Gran Parque Central","city":"Montevideo"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9ad"},"stadium_name":"Estadio Centenario","city":"Montevideo"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9ae"},"stadium_name":"Stadio Benito Mussolini","city":"Turin"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9af"},"stadium_name":"Stadio Littorio","city":"Trieste"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9b0"},"stadium_name":"Stadio Giovanni Berta","city":"Florence"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9b1"},"stadium_name":"Stadio Giorgio Ascarelli","city":"Naples"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9b2"},"stadium_name":"Stadio Nazionale PNF","city":"Rome"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9b3"},"stadium_name":"Stadio Luigi Ferraris","city":"Genoa"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9b4"},"stadium_name":"Stadio Renato Dall'Ara","city":"Bologna"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9b5"},"stadium_name":"San Siro","city":"Milan"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9b6"},"stadium_name":"Parc des Princes","city":"Paris"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9b7"},"stadium_name":"Stade du T.O.E.C.","city":"Toulouse"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9b8"},"stadium_name":"Stade Olympique de Colombes","city":"Paris"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9b9"},"stadium_name":"V\u00e9lodrome Municipal","city":"Reims"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9ba"},"stadium_name":"Stade V\u00e9lodrome","city":"Marseille"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9bb"},"stadium_name":"Stade de la Meinau","city":"Strasbourg"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9bc"},"stadium_name":"Stade Jules Deschaseaux","city":"Le Havre"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9bd"},"stadium_name":"Stade du Parc Lescure","city":"Bordeaux"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9be"},"stadium_name":"Stade Victor Boucquey","city":"Lille"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9bf"},"stadium_name":"Stade du Fort Carr\u00e9","city":"Antibes"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9c0"},"stadium_name":"Est\u00e1dio do Maracan\u00e3","city":"Rio de Janeiro"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9c1"},"stadium_name":"Est\u00e1dio Independ\u00eancia","city":"Belo Horizonte"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9c2"},"stadium_name":"Est\u00e1dio Vila Capanema","city":"Curitiba"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9c3"},"stadium_name":"Est\u00e1dio do Pacaembu","city":"S\u00e3o Paulo"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9c4"},"stadium_name":"Est\u00e1dio dos Eucaliptos","city":"Porto Alegre"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9c5"},"stadium_name":"Est\u00e1dio Ilha do Retiro","city":"Recife"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9c6"},"stadium_name":"Charmilles Stadium","city":"Geneva"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9c7"},"stadium_name":"Stade Olympique de la Pontaise","city":"Lausanne"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9c8"},"stadium_name":"Hardturm Stadium","city":"Z\u00fcrich"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9c9"},"stadium_name":"Wankdorf Stadium","city":"Bern"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9ca"},"stadium_name":"St. Jakob Stadium","city":"Basel"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9cb"},"stadium_name":"Cornaredo Stadium","city":"Lugano"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9cc"},"stadium_name":"R\u00e5sunda Stadium","city":"Solna"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9cd"},"stadium_name":"Malm\u00f6 Stadion","city":"Malm\u00f6"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9ce"},"stadium_name":"\u00d6rjans Vall","city":"Halmstad"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9cf"},"stadium_name":"Idrottsparken","city":"Norrk\u00f6ping"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9d0"},"stadium_name":"Arosvallen","city":"V\u00e4ster\u00e5s"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9d1"},"stadium_name":"Jernvallen","city":"Sandviken"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9d2"},"stadium_name":"Rimnersvallen","city":"Uddevalla"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9d3"},"stadium_name":"Ullevi","city":"Gothenburg"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9d4"},"stadium_name":"Olympia","city":"Helsingborg"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9d5"},"stadium_name":"Ryavallen","city":"Bor\u00e5s"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9d6"},"stadium_name":"Eyravallen","city":"\u00d6rebro"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9d7"},"stadium_name":"Tunavallen","city":"Eskilstuna"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9d8"},"stadium_name":"Estadio Carlos Dittborn","city":"Arica"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9d9"},"stadium_name":"Estadio Nacional","city":"Santiago"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9da"},"stadium_name":"Estadio Sausalito","city":"Vi\u00f1a del Mar"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9db"},"stadium_name":"Estadio El Teniente","city":"Rancagua"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9dc"},"stadium_name":"Wembley Stadium","city":"London"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9dd"},"stadium_name":"Hillsborough Stadium","city":"Sheffield"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9de"},"stadium_name":"Goodison Park","city":"Liverpool"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9df"},"stadium_name":"Ayresome Park","city":"Middlesbrough"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9e0"},"stadium_name":"Villa Park","city":"Birmingham"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9e1"},"stadium_name":"Old Trafford","city":"Manchester"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9e2"},"stadium_name":"Roker Park","city":"Sunderland"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9e3"},"stadium_name":"White City Stadium","city":"London"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9e4"},"stadium_name":"Estadio Azteca","city":"Mexico City"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9e5"},"stadium_name":"Estadio Cuauht\u00e9moc","city":"Puebla"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9e6"},"stadium_name":"Estadio Jalisco","city":"Guadalajara"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9e7"},"stadium_name":"Estadio Nou Camp","city":"Le\u00f3n"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9e8"},"stadium_name":"La Bombonera","city":"Toluca"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9e9"},"stadium_name":"Waldstadion","city":"Frankfurt"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9ea"},"stadium_name":"Olympiastadion","city":"Berlin"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9eb"},"stadium_name":"Volksparkstadion","city":"Hamburg"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9ec"},"stadium_name":"Westfalenstadion","city":"Dortmund"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9ed"},"stadium_name":"Rheinstadion","city":"D\u00fcsseldorf"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9ee"},"stadium_name":"Niedersachsenstadion","city":"Hanover"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9ef"},"stadium_name":"Olympiastadion","city":"Munich"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9f0"},"stadium_name":"Neckarstadion","city":"Stuttgart"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9f1"},"stadium_name":"Parkstadion","city":"Gelsenkirchen"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9f2"},"stadium_name":"Estadio Monumental","city":"Buenos Aires"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9f3"},"stadium_name":"Estadio Jos\u00e9 Mar\u00eda Minella","city":"Mar del Plata"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9f4"},"stadium_name":"Estadio Gigante de Arroyito","city":"Rosario"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9f5"},"stadium_name":"Estadio Jos\u00e9 Amalfitani","city":"Buenos Aires"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9f6"},"stadium_name":"Estadio Ciudad de Mendoza","city":"Mendoza"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9f7"},"stadium_name":"Estadio Chateau Carreras","city":"C\u00f3rdoba"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9f8"},"stadium_name":"Camp Nou","city":"Barcelona"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9f9"},"stadium_name":"Bala\u00eddos","city":"Vigo"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9fa"},"stadium_name":"Estadio Ram\u00f3n S\u00e1nchez Pizju\u00e1n","city":"Seville"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9fb"},"stadium_name":"Estadio Riazor","city":"A Coru\u00f1a"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9fc"},"stadium_name":"Nuevo Estadio","city":"Elche"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9fd"},"stadium_name":"Estadio La Rosaleda","city":"M\u00e1laga"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9fe"},"stadium_name":"Estadio El Molin\u00f3n","city":"Gij\u00f3n"}
+{"_id":{"$oid":"67376e4bdad29ff7a579b9ff"},"stadium_name":"Estadio San Mam\u00e9s","city":"Bilbao"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba00"},"stadium_name":"Estadio Luis Casanova","city":"Valencia"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba01"},"stadium_name":"Estadio Carlos Tartiere","city":"Oviedo"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba02"},"stadium_name":"Estadio Jos\u00e9 Zorrilla","city":"Valladolid"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba03"},"stadium_name":"Estadio La Romareda","city":"Zaragoza"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba04"},"stadium_name":"Estadio Jos\u00e9 Rico P\u00e9rez","city":"Alicante"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba05"},"stadium_name":"Estadio Benito Villamar\u00edn","city":"Seville"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba06"},"stadium_name":"Vicente Calder\u00f3n","city":"Madrid"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba07"},"stadium_name":"Estadi de Sarri\u00e0","city":"Barcelona"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba08"},"stadium_name":"Estadio Santiago Bernab\u00e9u","city":"Madrid"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba09"},"stadium_name":"Estadio Ol\u00edmpico Universitario","city":"Mexico City"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba0a"},"stadium_name":"Estadio Sergio Le\u00f3n Chavez","city":"Irapuato"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba0b"},"stadium_name":"Estadio Universitario","city":"Monterrey"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba0c"},"stadium_name":"Estadio Tres de Marzo","city":"Guadalajara"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba0d"},"stadium_name":"Estadio Tecnol\u00f3gico","city":"Monterrey"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba0e"},"stadium_name":"Estadio La Corregidora","city":"Quer\u00e9taro"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba0f"},"stadium_name":"Estadio Neza 86","city":"Nezahualc\u00f3yotl"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba10"},"stadium_name":"Stadio San Nicola","city":"Bari"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba11"},"stadium_name":"Stadio Olimpico","city":"Rome"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba12"},"stadium_name":"Stadio Comunale","city":"Florence"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba13"},"stadium_name":"Stadio delle Alpi","city":"Turin"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba14"},"stadium_name":"Stadio Sant'Elia","city":"Cagliari"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba15"},"stadium_name":"Stadio Marc'Antonio Bentegodi","city":"Verona"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba16"},"stadium_name":"Stadio La Favorita","city":"Palermo"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba17"},"stadium_name":"Stadio Friuli","city":"Udine"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba18"},"stadium_name":"Stadio San Paolo","city":"Naples"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba19"},"stadium_name":"Soldier Field","city":"Chicago"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba1a"},"stadium_name":"Cotton Bowl","city":"Dallas"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba1b"},"stadium_name":"Pontiac Silverdome","city":"Pontiac"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba1c"},"stadium_name":"Giants Stadium","city":"East Rutherford"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba1d"},"stadium_name":"Rose Bowl","city":"Pasadena"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba1e"},"stadium_name":"Citrus Bowl","city":"Orlando"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba1f"},"stadium_name":"RFK Stadium","city":"Washington, D.C."}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba20"},"stadium_name":"Stanford Stadium","city":"Stanford"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba21"},"stadium_name":"Foxboro Stadium","city":"Foxborough"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba22"},"stadium_name":"Stade de France","city":"Saint-Denis"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba23"},"stadium_name":"Stade de la Mosson","city":"Montpellier"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba24"},"stadium_name":"Stade de Toulouse","city":"Toulouse"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba25"},"stadium_name":"Stade F\u00e9lix-Bollaert","city":"Lens"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba26"},"stadium_name":"Stade de la Beaujoire","city":"Nantes"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba27"},"stadium_name":"Stade de Gerland","city":"Lyon"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba28"},"stadium_name":"Stade Geoffroy-Guichard","city":"Saint-\u00c9tienne"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba29"},"stadium_name":"Seoul World Cup Stadium","city":"Seoul"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba2a"},"stadium_name":"Niigata Stadium","city":"Niigata"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba2b"},"stadium_name":"Ulsan Munsu Football Stadium","city":"Ulsan"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba2c"},"stadium_name":"Sapporo Dome","city":"Sapporo"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba2d"},"stadium_name":"Kashima Stadium","city":"Ibaraki"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba2e"},"stadium_name":"Busan Asiad Stadium","city":"Busan"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba2f"},"stadium_name":"Saitama Stadium","city":"Saitama"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba30"},"stadium_name":"Gwangju World Cup Stadium","city":"Gwangju"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba31"},"stadium_name":"Kobe Wing Stadium","city":"Kobe"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba32"},"stadium_name":"Suwon World Cup Stadium","city":"Suwon"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba33"},"stadium_name":"Daegu World Cup Stadium","city":"Daegu"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba34"},"stadium_name":"Jeonju World Cup Stadium","city":"Jeonju"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba35"},"stadium_name":"Jeju World Cup Stadium","city":"Seogwipo"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba36"},"stadium_name":"Miyagi Stadium","city":"Miyagi"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba37"},"stadium_name":"Incheon Munhak Stadium","city":"Incheon"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba38"},"stadium_name":"International Stadium Yokohama","city":"Yokohama"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba39"},"stadium_name":"\u014cita Stadium","city":"\u014cita"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba3a"},"stadium_name":"Shizuoka Stadium ECOPA","city":"Shizuoka"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba3b"},"stadium_name":"Nagai Stadium","city":"Osaka"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba3c"},"stadium_name":"Daejeon World Cup Stadium","city":"Daejeon"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba3d"},"stadium_name":"Allianz Arena","city":"Munich"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba3e"},"stadium_name":"Arena AufShalke","city":"Gelsenkirchen"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba3f"},"stadium_name":"Zentralstadion","city":"Leipzig"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba40"},"stadium_name":"Frankenstadion","city":"Nuremberg"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba41"},"stadium_name":"RheinEnergieStadion","city":"Cologne"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba42"},"stadium_name":"Fritz-Walter-Stadion","city":"Kaiserslautern"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba43"},"stadium_name":"Soccer City","city":"Johannesburg"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba44"},"stadium_name":"Cape Town Stadium","city":"Cape Town"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba45"},"stadium_name":"Nelson Mandela Bay Stadium","city":"Port Elizabeth"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba46"},"stadium_name":"Ellis Park Stadium","city":"Johannesburg"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba47"},"stadium_name":"Royal Bafokeng Stadium","city":"Rustenburg"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba48"},"stadium_name":"Peter Mokaba Stadium","city":"Polokwane"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba49"},"stadium_name":"Loftus Versfeld Stadium","city":"Pretoria"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba4a"},"stadium_name":"Moses Mabhida Stadium","city":"Durban"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba4b"},"stadium_name":"Free State Stadium","city":"Bloemfontein"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba4c"},"stadium_name":"Mbombela Stadium","city":"Nelspruit"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba4d"},"stadium_name":"Arena Corinthians","city":"S\u00e3o Paulo"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba4e"},"stadium_name":"Arena das Dunas","city":"Natal"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba4f"},"stadium_name":"Arena Fonte Nova","city":"Salvador"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba50"},"stadium_name":"Arena Pantanal","city":"Cuiab\u00e1"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba51"},"stadium_name":"Est\u00e1dio Mineir\u00e3o","city":"Belo Horizonte"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba52"},"stadium_name":"Est\u00e1dio Castel\u00e3o","city":"Fortaleza"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba53"},"stadium_name":"Arena da Amaz\u00f4nia","city":"Manaus"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba54"},"stadium_name":"Arena Pernambuco","city":"Recife"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba55"},"stadium_name":"Est\u00e1dio Nacional","city":"Bras\u00edlia"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba56"},"stadium_name":"Est\u00e1dio Beira-Rio","city":"Porto Alegre"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba57"},"stadium_name":"Arena da Baixada","city":"Curitiba"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba58"},"stadium_name":"Luzhniki Stadium","city":"Moscow"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba59"},"stadium_name":"Central Stadium","city":"Yekaterinburg"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba5a"},"stadium_name":"Krestovsky Stadium","city":"Saint Petersburg"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba5b"},"stadium_name":"Fisht Olympic Stadium","city":"Sochi"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba5c"},"stadium_name":"Kazan Arena","city":"Kazan"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba5d"},"stadium_name":"Otkritie Arena","city":"Moscow"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba5e"},"stadium_name":"Mordovia Arena","city":"Saransk"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba5f"},"stadium_name":"Kaliningrad Stadium","city":"Kaliningrad"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba60"},"stadium_name":"Samara Arena","city":"Samara"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba61"},"stadium_name":"Rostov Arena","city":"Rostov-on-Don"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba62"},"stadium_name":"Nizhny Novgorod Stadium","city":"Nizhny Novgorod"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba63"},"stadium_name":"Volgograd Arena","city":"Volgograd"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba64"},"stadium_name":"Al Bayt Stadium","city":"Al Khor"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba65"},"stadium_name":"Khalifa International Stadium","city":"Al Rayyan"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba66"},"stadium_name":"Al Thumama Stadium","city":"Doha"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba67"},"stadium_name":"Ahmad bin Ali Stadium","city":"Al Rayyan"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba68"},"stadium_name":"Lusail Stadium","city":"Lusail"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba69"},"stadium_name":"Education City Stadium","city":"Al Rayyan"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba6a"},"stadium_name":"Stadium 974","city":"Doha"}
+{"_id":{"$oid":"67376e4bdad29ff7a579ba6b"},"stadium_name":"Al Janoub Stadium","city":"Al Wakrah"}

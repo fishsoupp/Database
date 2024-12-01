@@ -1,0 +1,85 @@
+{"_id":{"$oid":"67376e50dad29ff7a579ba6d"},"team_name":"Argentina","fifa_code":"ARG","continent":"South America"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba6e"},"team_name":"Belgium","fifa_code":"BEL","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba6f"},"team_name":"Bolivia","fifa_code":"BOL","continent":"South America"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba70"},"team_name":"Brazil","fifa_code":"BRA","continent":"South America"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba71"},"team_name":"Chile","fifa_code":"CHL","continent":"South America"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba72"},"team_name":"France","fifa_code":"FRA","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba73"},"team_name":"Mexico","fifa_code":"MEX","continent":"North America"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba74"},"team_name":"Paraguay","fifa_code":"PRY","continent":"South America"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba75"},"team_name":"Peru","fifa_code":"PER","continent":"South America"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba76"},"team_name":"Romania","fifa_code":"ROU","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba77"},"team_name":"United States","fifa_code":"USA","continent":"North America"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba78"},"team_name":"Uruguay","fifa_code":"URY","continent":"South America"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba79"},"team_name":"Yugoslavia","fifa_code":"YUG","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba7a"},"team_name":"Austria","fifa_code":"AUT","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba7b"},"team_name":"Czechoslovakia","fifa_code":"CSK","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba7c"},"team_name":"Egypt","fifa_code":"EGY","continent":"Africa"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba7d"},"team_name":"Germany","fifa_code":"DEU","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba7e"},"team_name":"Hungary","fifa_code":"HUN","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba7f"},"team_name":"Italy","fifa_code":"ITA","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba80"},"team_name":"Netherlands","fifa_code":"NLD","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba81"},"team_name":"Spain","fifa_code":"ESP","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba82"},"team_name":"Sweden","fifa_code":"SWE","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba83"},"team_name":"Switzerland","fifa_code":"CHE","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba84"},"team_name":"Cuba","fifa_code":"CUB","continent":"North America"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba85"},"team_name":"Dutch East Indies","fifa_code":"IDN","continent":"Asia"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba86"},"team_name":"Norway","fifa_code":"NOR","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba87"},"team_name":"Poland","fifa_code":"POL","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba88"},"team_name":"England","fifa_code":"ENG","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba89"},"team_name":"Scotland","fifa_code":"SCO","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba8a"},"team_name":"South Korea","fifa_code":"KOR","continent":"Asia"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba8b"},"team_name":"Turkey","fifa_code":"TUR","continent":"Asia"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba8c"},"team_name":"West Germany","fifa_code":"DEU","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba8d"},"team_name":"Northern Ireland","fifa_code":"NIR","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba8e"},"team_name":"Soviet Union","fifa_code":"SUN","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba8f"},"team_name":"Wales","fifa_code":"WAL","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba90"},"team_name":"Bulgaria","fifa_code":"BGR","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba91"},"team_name":"Colombia","fifa_code":"COL","continent":"South America"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba92"},"team_name":"North Korea","fifa_code":"PRK","continent":"Asia"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba93"},"team_name":"Portugal","fifa_code":"PRT","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba94"},"team_name":"El Salvador","fifa_code":"SLV","continent":"North America"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba95"},"team_name":"Israel","fifa_code":"ISR","continent":"Asia"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba96"},"team_name":"Morocco","fifa_code":"MAR","continent":"Africa"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba97"},"team_name":"Australia","fifa_code":"AUS","continent":"Oceania"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba98"},"team_name":"East Germany","fifa_code":"DDR","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba99"},"team_name":"Haiti","fifa_code":"HTI","continent":"North America"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba9a"},"team_name":"Zaire","fifa_code":"COD","continent":"Africa"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba9b"},"team_name":"Iran","fifa_code":"IRN","continent":"Asia"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba9c"},"team_name":"Tunisia","fifa_code":"TUN","continent":"Africa"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba9d"},"team_name":"Algeria","fifa_code":"DZA","continent":"Africa"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba9e"},"team_name":"Cameroon","fifa_code":"CMR","continent":"Africa"}
+{"_id":{"$oid":"67376e50dad29ff7a579ba9f"},"team_name":"Honduras","fifa_code":"HND","continent":"North America"}
+{"_id":{"$oid":"67376e50dad29ff7a579baa0"},"team_name":"Kuwait","fifa_code":"KWT","continent":"Asia"}
+{"_id":{"$oid":"67376e50dad29ff7a579baa1"},"team_name":"New Zealand","fifa_code":"NZL","continent":"Oceania"}
+{"_id":{"$oid":"67376e50dad29ff7a579baa2"},"team_name":"Canada","fifa_code":"CAN","continent":"North America"}
+{"_id":{"$oid":"67376e50dad29ff7a579baa3"},"team_name":"Denmark","fifa_code":"DNK","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579baa4"},"team_name":"Iraq","fifa_code":"IRQ","continent":"Asia"}
+{"_id":{"$oid":"67376e50dad29ff7a579baa5"},"team_name":"Costa Rica","fifa_code":"CRI","continent":"North America"}
+{"_id":{"$oid":"67376e50dad29ff7a579baa6"},"team_name":"Republic of Ireland","fifa_code":"IRL","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579baa7"},"team_name":"United Arab Emirates","fifa_code":"ARE","continent":"Asia"}
+{"_id":{"$oid":"67376e50dad29ff7a579baa8"},"team_name":"Greece","fifa_code":"GRC","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579baa9"},"team_name":"Nigeria","fifa_code":"NGA","continent":"Africa"}
+{"_id":{"$oid":"67376e50dad29ff7a579baaa"},"team_name":"Russia","fifa_code":"RUS","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579baab"},"team_name":"Saudi Arabia","fifa_code":"SAU","continent":"Asia"}
+{"_id":{"$oid":"67376e50dad29ff7a579baac"},"team_name":"Croatia","fifa_code":"HRV","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579baad"},"team_name":"Jamaica","fifa_code":"JAM","continent":"North America"}
+{"_id":{"$oid":"67376e50dad29ff7a579baae"},"team_name":"Japan","fifa_code":"JPN","continent":"Asia"}
+{"_id":{"$oid":"67376e50dad29ff7a579baaf"},"team_name":"South Africa","fifa_code":"ZAF","continent":"Africa"}
+{"_id":{"$oid":"67376e50dad29ff7a579bab0"},"team_name":"China","fifa_code":"CHN","continent":"Asia"}
+{"_id":{"$oid":"67376e50dad29ff7a579bab1"},"team_name":"Ecuador","fifa_code":"ECU","continent":"South America"}
+{"_id":{"$oid":"67376e50dad29ff7a579bab2"},"team_name":"Senegal","fifa_code":"SEN","continent":"Africa"}
+{"_id":{"$oid":"67376e50dad29ff7a579bab3"},"team_name":"Slovenia","fifa_code":"SVN","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579bab4"},"team_name":"Angola","fifa_code":"AGO","continent":"Africa"}
+{"_id":{"$oid":"67376e50dad29ff7a579bab5"},"team_name":"Czech Republic","fifa_code":"CZE","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579bab6"},"team_name":"Ghana","fifa_code":"GHA","continent":"Africa"}
+{"_id":{"$oid":"67376e50dad29ff7a579bab7"},"team_name":"Ivory Coast","fifa_code":"CIV","continent":"Africa"}
+{"_id":{"$oid":"67376e50dad29ff7a579bab8"},"team_name":"Serbia and Montenegro","fifa_code":"SCG","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579bab9"},"team_name":"Togo","fifa_code":"TGO","continent":"Africa"}
+{"_id":{"$oid":"67376e50dad29ff7a579baba"},"team_name":"Trinidad and Tobago","fifa_code":"TTO","continent":"South America"}
+{"_id":{"$oid":"67376e50dad29ff7a579babb"},"team_name":"Ukraine","fifa_code":"UKR","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579babc"},"team_name":"Serbia","fifa_code":"SRB","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579babd"},"team_name":"Slovakia","fifa_code":"SVK","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579babe"},"team_name":"Bosnia and Herzegovina","fifa_code":"BIH","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579babf"},"team_name":"Iceland","fifa_code":"ISL","continent":"Europe"}
+{"_id":{"$oid":"67376e50dad29ff7a579bac0"},"team_name":"Panama","fifa_code":"PAN","continent":"North America"}
+{"_id":{"$oid":"67376e50dad29ff7a579bac1"},"team_name":"Qatar","fifa_code":"QAT","continent":"Asia"}
