@@ -43,24 +43,37 @@
     </table>
 
     <!-- Pagination -->
-    <nav aria-label="Page navigation" class="mt-5">
-        <ul class="pagination justify-content-center">
-            {% if page > 1 %}
-            <li class="page-item"><a class="page-link" href="{{ url_for('ranking', page=1) }}">First</a></li>
-            <li class="page-item"><a class="page-link" href="{{ url_for('ranking', page=page-1) }}">Previous</a></li>
-            {% endif %}
+   <!-- Pagination -->
+<nav aria-label="Page navigation" class="mt-5">
+    <ul class="pagination justify-content-center">
+        <!-- First and Previous Links -->
+        {% if page > 1 %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('ranking', page=1, q=search_query) }}">First</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('ranking', page=page-1, q=search_query) }}">Previous</a>
+        </li>
+        {% endif %}
 
-            {% for i in range(start_page, end_page + 1) %}
-            <li class="page-item {% if page == i %}active{% endif %}">
-                <a class="page-link" href="{{ url_for('ranking', page=i) }}">{{ i }}</a>
-            </li>
-            {% endfor %}
+        <!-- Page Numbers -->
+        {% for i in range(start_page, end_page + 1) %}
+        <li class="page-item {% if page == i %}active{% endif %}">
+            <a class="page-link" href="{{ url_for('ranking', page=i, q=search_query) }}">{{ i }}</a>
+        </li>
+        {% endfor %}
 
-            {% if page < total_pages %}
-            <li class="page-item"><a class="page-link" href="{{ url_for('ranking', page=page+1) }}">Next</a></li>
-            <li class="page-item"><a class="page-link" href="{{ url_for('ranking', page=total_pages) }}">Last</a></li>
-            {% endif %}
-        </ul>
-    </nav>
+        <!-- Next and Last Links -->
+        {% if page < total_pages %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('ranking', page=page+1, q=search_query) }}">Next</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('ranking', page=total_pages, q=search_query) }}">Last</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+
 </div>
 {% endblock %}

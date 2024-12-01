@@ -9,6 +9,7 @@ import json
 from sqlalchemy.sql import text
 from decimal import Decimal
 from bson import ObjectId
+from bson.regex import Regex
 
 
 # Load environment variables
@@ -431,16 +432,16 @@ def matches():
 @app.route('/ranking')
 def ranking():
     page = request.args.get('page', 1, type=int)  # Current page number
-    search_query = request.args.get('q', '')     # Search query
-    per_page = 10                                # Number of items per page
-    offset = (page - 1) * per_page               # Calculate offset
+    search_query = request.args.get('q', '').strip()  # Search query (trim whitespace)
+    per_page = 10                                  # Number of items per page
+    offset = (page - 1) * per_page                 # Calculate offset
 
-    # Calculate world_cup_wins and matches_won
-    teams = list(db.teams.aggregate([
+    # MongoDB aggregation pipeline for calculating world_cup_wins and matches_won
+    pipeline = [
         {
             "$lookup": {
-                "from": "tournaments",            # Join with tournaments collection
-                "localField": "_id",              # Match by team _id
+                "from": "tournaments",              # Join with tournaments collection
+                "localField": "_id",                # Match by team _id
                 "foreignField": "winning_team._id", # Tournament's winning_team._id
                 "as": "wins"
             }
@@ -452,14 +453,14 @@ def ranking():
         },
         {
             "$lookup": {
-                "from": "matches",                # Join with matches collection
-                "let": {"team_id": "$_id"},       # Pass team _id as a variable
+                "from": "matches",                  # Join with matches collection
+                "let": {"team_id": "$_id"},         # Pass team _id as a variable
                 "pipeline": [
                     {"$match": {"$expr": {"$or": [
                         {"$and": [{"$eq": ["$home_team._id", "$$team_id"]}, {"$gt": ["$home_team_goal", "$away_team_goal"]}]},
                         {"$and": [{"$eq": ["$away_team._id", "$$team_id"]}, {"$gt": ["$away_team_goal", "$home_team_goal"]}]}
-                    ]}}},                         # Match wins for home or away team
-                    {"$count": "wins"}            # Count wins
+                    ]}}},
+                    {"$count": "wins"}              # Count wins
                 ],
                 "as": "matches_won_count"
             }
@@ -469,20 +470,35 @@ def ranking():
                 "matches_won": {"$ifNull": [{"$arrayElemAt": ["$matches_won_count.wins", 0]}, 0]}  # Get matches won count
             }
         },
-        {"$sort": {"world_cup_wins": -1, "matches_won": -1}},  # Sort by world cup wins and matches won
-        {"$skip": offset},                                      # Pagination offset
-        {"$limit": per_page}                                    # Pagination limit
-    ]))
+        {"$sort": {"world_cup_wins": -1, "matches_won": -1}}  # Sort by world cup wins and matches won
+    ]
 
-    # Filter based on search query
+    # Apply search query if provided
     if search_query:
-        teams = [team for team in teams if search_query.lower() in team["team_name"].lower()]
+        pipeline.insert(0, {
+            "$match": {
+                "team_name": Regex(search_query, "i")  # Case-insensitive regex match
+            }
+        })
 
-    # Calculate total teams for pagination
-    total_teams = db.teams.count_documents({})
+    # Pagination
+    pipeline.extend([
+        {"$skip": offset},      # Pagination offset
+        {"$limit": per_page}    # Pagination limit
+    ])
+
+    # Execute the pipeline
+    teams = list(db.teams.aggregate(pipeline))
+
+    # Total teams (filtered or unfiltered)
+    if search_query:
+        total_teams = db.teams.count_documents({"team_name": Regex(search_query, "i")})
+    else:
+        total_teams = db.teams.count_documents({})
+
     total_pages = ceil(total_teams / per_page)
 
-    # Calculate the start and end page for pagination controls
+    # Pagination controls
     visible_pages = 5  # Number of pages to display in pagination controls
     start_page = max(1, page - visible_pages // 2)
     end_page = min(total_pages, start_page + visible_pages - 1)
